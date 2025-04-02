@@ -26,7 +26,7 @@ class PayScreen extends StatelessWidget {
   final String? id;
   final String? plate;
 
-  final _formKey = GlobalKey<FormState>();
+  // final _formKey = GlobalKey<FormState>();
   final TextEditingController cardNumberController = TextEditingController();
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
@@ -65,30 +65,51 @@ class PayScreen extends StatelessWidget {
           );
         } else if (snapshot.hasData && snapshot.data == true) {
           // If payment methods are available, let the user select one
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Select Payment Method'),
-            ),
-            body: ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: fakePaymentMethods.length,
-              itemBuilder: (context, index) {
-                final method = fakePaymentMethods[index];
-                return ListTile(
-                  title: Text(method['name']!),
-                  onTap: () {
-                    // Handle selection of a fake payment method
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Selected ${method['name']}')),
-                    );
-                  },
-                );
-              },
-            ),
-          );
+            return PaymentMethodsPage(
+            paymentMethods: fakePaymentMethods,
+            onPaymentMethodSelected: (selectedMethod) {
+              // Handle the selected payment method
+              ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Selected ${selectedMethod['name']}')),
+              );
+            },
+            amount: amount,
+            duration: duration,
+            zone: zone,
+            id: id,
+            plate: plate,
+            );
         } else {
           // If no payment methods are available, show the normal pay screen
-          return Scaffold(
+            return NewPaymentMethodPage(
+            amount: amount,
+            duration: duration,
+            zone: zone,
+            id: id,
+            plate: plate,
+            );
+        }
+      },
+    );
+  }
+}
+
+class NewPaymentMethodPage extends StatelessWidget{
+  final double amount;
+  final int duration;
+  final String zone;
+  final String? id;
+  final String? plate;
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController cardNumberController = TextEditingController();
+  final TextEditingController expiryDateController = TextEditingController();
+  final TextEditingController cvcController = TextEditingController();
+  
+  NewPaymentMethodPage({required this.amount, required this.duration, required this.zone, this.id, this.plate});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
             appBar: AppBar(
               title: Text('Payment'),
             ),
@@ -193,7 +214,7 @@ class PayScreen extends StatelessWidget {
                               }
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Error: $e')),
+                                SnackBar(content: Text('Error: impossible connection to the server')),
                               );
                             }
                           }
@@ -205,8 +226,115 @@ class PayScreen extends StatelessWidget {
               ),
             ),
           );
+  }
+}
+
+class PaymentMethodsPage extends StatelessWidget {
+  final List<Map<String, String>> paymentMethods;
+  final Function(Map<String, String>) onPaymentMethodSelected;
+
+  final double amount;
+  final int duration;
+  final String zone;
+  final String? id;
+  final String? plate;
+
+  PaymentMethodsPage({
+    required this.paymentMethods,
+    required this.onPaymentMethodSelected,
+    required this.amount,
+    required this.duration,
+    required this.zone,
+    this.id,
+    this.plate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+      title: Text('Select Payment Method'),
+      ),
+      body: ListView.builder(
+      itemCount: paymentMethods.length + 1, // Add one for the "Add New Payment Method" option
+      itemBuilder: (context, index) {
+        if (index == paymentMethods.length) {
+        // Add New Payment Method option
+        return ListTile(
+          title: Text('Add New Payment Method'),
+          leading: Icon(Icons.add),
+          onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+            builder: (context) => NewPaymentMethodPage(
+              amount: amount,
+              duration: duration,
+              zone: zone,
+              id: id,
+              plate: plate,
+            ),
+            ),
+          );
+          },
+        );
+        } else {
+        final method = paymentMethods[index];
+        return ListTile(
+          title: Text(method['name']!),
+          onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+            title: Text('Confirm Payment Method'),
+            content: Text('Are you sure you want to use ${method['name']}?'),
+            actions: [
+              TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+              ),
+              TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final url = Uri.parse('https://your-server.com/api/process-payment');
+                try {
+                final response = await http.post(
+                  url,
+                  headers: {'Content-Type': 'application/json'},
+                  body: jsonEncode({
+                  'paymentMethodId': method['id'],
+                  'amount': (context.findAncestorWidgetOfExactType<PayScreen>() as PayScreen).amount,
+                  'duration': (context.findAncestorWidgetOfExactType<PayScreen>() as PayScreen).duration,
+                  'zone': (context.findAncestorWidgetOfExactType<PayScreen>() as PayScreen).zone,
+                  'ticket_id': (context.findAncestorWidgetOfExactType<PayScreen>() as PayScreen).id,
+                  'plate': (context.findAncestorWidgetOfExactType<PayScreen>() as PayScreen).plate,
+                  }),
+                );
+
+                if (response.statusCode == 200) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Payment processed successfully.')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to process payment. Please try again.')),
+                  );
+                }
+                } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: $e')),
+                );
+                }
+              },
+              child: Text('Yes'),
+              ),
+            ],
+            ),
+          );
+          },
+        );
         }
       },
+      ),
     );
   }
 }
