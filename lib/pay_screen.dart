@@ -14,7 +14,8 @@ Future<bool> hasRegisteredPaymentMethods() async {
     }
   } catch (e) {
     print('Error: $e');
-    return false;
+    // return false;
+    return true; // For debug purposes, always return true
   }
 }
 
@@ -22,12 +23,22 @@ class PayScreen extends StatelessWidget {
   final double amount;
   final int duration;
   final String zone;
+  final String? id;
+  final String? plate;
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController cardNumberController = TextEditingController();
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
 
-  PayScreen({required this.amount, required this.duration, required this.zone});
+  // Fake registered payment methods for debug purposes
+  final List<Map<String, String>> fakePaymentMethods = [
+    {'name': 'Visa **** 1234', 'id': '1'},
+    {'name': 'MasterCard **** 5678', 'id': '2'},
+    {'name': 'Amex **** 9012', 'id': '3'},
+  ];
+
+  PayScreen({required this.amount, required this.duration, required this.zone, this.id, this.plate});
 
   @override
   Widget build(BuildContext context) {
@@ -58,29 +69,21 @@ class PayScreen extends StatelessWidget {
             appBar: AppBar(
               title: Text('Select Payment Method'),
             ),
-            body: ListView(
+            body: ListView.builder(
               padding: const EdgeInsets.all(16.0),
-              children: [
-                ListTile(
-                  title: Text('Payment Method 1'),
+              itemCount: fakePaymentMethods.length,
+              itemBuilder: (context, index) {
+                final method = fakePaymentMethods[index];
+                return ListTile(
+                  title: Text(method['name']!),
                   onTap: () {
-                    // Handle selection of payment method 1
+                    // Handle selection of a fake payment method
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Selected Payment Method 1')),
+                      SnackBar(content: Text('Selected ${method['name']}')),
                     );
                   },
-                ),
-                ListTile(
-                  title: Text('Payment Method 2'),
-                  onTap: () {
-                    // Handle selection of payment method 2
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Selected Payment Method 2')),
-                    );
-                  },
-                ),
-                // Add more payment methods as needed
-              ],
+                );
+              },
             ),
           );
         } else {
@@ -173,6 +176,8 @@ class PayScreen extends StatelessWidget {
                                   'amount': amount,
                                   'duration': duration,
                                   'zone': zone,
+                                  'ticket_id': id!,
+                                  'plate': plate,
                                 }),
                               );
 

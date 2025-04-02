@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app.dart';
 import 'firebase_options.dart';
 
-const clientId = 'YOUR_CLIENT_ID';
+// const clientId = 'YOUR_CLIENT_ID';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,5 +1,6 @@
 // import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:eticket_web_app/ticket_page.dart';
+import 'package:eticket_web_app/purchased_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:english_words/english_words.dart';
@@ -61,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = TicketPage();
         break;
       case 1:
-        page = FavoritesPage();
+        page = PurchasedPage();
         break;
       case 2:
         page = GeneratorPage();
