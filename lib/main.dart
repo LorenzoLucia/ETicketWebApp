@@ -5,13 +5,22 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app.dart';
 import 'firebase_options.dart';
 
-// TODO(codelab user): Get API key
 const clientId = 'YOUR_CLIENT_ID';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  runApp(const MyApp());
+  try {
+    await dotenv.load(fileName: ".env");
+    print('API_KEY: ${dotenv.env['FIREBASE_API_KEY_ANDROID=']}'); // Debug print statement
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    runApp(const MyApp());
+  } catch (e) {
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('Initialization failed: $e'),
+        ),
+      ),
+    ));
+  }
 }

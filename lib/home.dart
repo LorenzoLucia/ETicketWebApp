@@ -1,4 +1,5 @@
 // import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:eticket_web_app/ticket_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:english_words/english_words.dart';
@@ -17,6 +18,7 @@ class HomeScreen extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         ),
         home: MyHomePage(),
+        // home:PayScreen(),
       ),
     );
   }
@@ -56,13 +58,13 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = GeneratorPage();
+        page = TicketPage();
         break;
       case 1:
         page = FavoritesPage();
         break;
       case 2:
-        page = ProfilePage();
+        page = GeneratorPage();
         break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');
@@ -108,16 +110,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
       }
-    );
-  }
-}
-
-class ProfilePage extends StatelessWidget {
-  //TODO
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Profile Page'),
     );
   }
 }
