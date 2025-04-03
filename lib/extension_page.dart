@@ -7,7 +7,7 @@ class ExtensionPage extends StatefulWidget {
   final DateTime expirationDateTime;
   final String plate;
 
-  ExtensionPage({
+  const ExtensionPage({super.key, 
     required this.id,
     required this.zone,
     required this.expirationDateTime,

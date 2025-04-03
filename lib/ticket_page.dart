@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:eticket_web_app/pay_screen.dart';
 
 class TicketPage extends StatefulWidget {
+  const TicketPage({super.key});
+
   @override
   _TicketPageState createState() => _TicketPageState();
 }

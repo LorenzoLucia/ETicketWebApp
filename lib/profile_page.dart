@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -212,7 +214,7 @@ class _ProfilePageState extends State<ProfilePage> {
             onPressed: () => _removePaymentMethod(index),
           ),
           );
-        }).toList(),
+        }),
         SizedBox(height: 20),
         Text(
           'Registered Plates',
@@ -229,7 +231,7 @@ class _ProfilePageState extends State<ProfilePage> {
             onPressed: () => _removePlate(index),
           ),
           );
-        }).toList(),
+        }),
         SizedBox(height: 10),
         ElevatedButton(
           onPressed: () {
@@ -271,10 +273,10 @@ class _ProfilePageState extends State<ProfilePage> {
           await FirebaseAuth.instance.signOut();
           Navigator.of(context).pushReplacementNamed('/login');
           },
-          child: Text('Logout'),
           style: ElevatedButton.styleFrom(
           backgroundColor: Colors.orangeAccent,
           ),
+          child: Text('Logout'),
         ),
         ],
       ),
@@ -284,6 +286,8 @@ class _ProfilePageState extends State<ProfilePage> {
 }
 
 class ChangePasswordPage extends StatelessWidget {
+  const ChangePasswordPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     TextEditingController oldPasswordController = TextEditingController();
@@ -384,7 +388,7 @@ class ChangePasswordPage extends StatelessWidget {
 class AddPlatePage extends StatelessWidget {
   final Function(String) onAddPlate;
 
-  AddPlatePage({required this.onAddPlate});
+  const AddPlatePage({super.key, required this.onAddPlate});
 
   @override
   Widget build(BuildContext context) {

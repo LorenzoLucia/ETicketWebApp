@@ -10,8 +10,7 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await dotenv.load(fileName: ".env");
-    print('API_KEY: ${dotenv.env['FIREBASE_API_KEY_ANDROID=']}'); // Debug print statement
+    await dotenv.load(fileName: "assets/.env"); // Debug print statement
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     runApp(const MyApp());
   } catch (e) {

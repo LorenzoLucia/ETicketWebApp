@@ -38,7 +38,7 @@ class PayScreen extends StatelessWidget {
     {'name': 'Amex **** 9012', 'id': '3'},
   ];
 
-  PayScreen({required this.amount, required this.duration, required this.zone, this.id, this.plate});
+  PayScreen({super.key, required this.amount, required this.duration, required this.zone, this.id, this.plate});
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +105,7 @@ class NewPaymentMethodPage extends StatelessWidget{
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
   
-  NewPaymentMethodPage({required this.amount, required this.duration, required this.zone, this.id, this.plate});
+  NewPaymentMethodPage({super.key, required this.amount, required this.duration, required this.zone, this.id, this.plate});
 
   @override
   Widget build(BuildContext context) {
@@ -239,7 +239,7 @@ class PaymentMethodsPage extends StatelessWidget {
   final String? id;
   final String? plate;
 
-  PaymentMethodsPage({
+  const PaymentMethodsPage({super.key, 
     required this.paymentMethods,
     required this.onPaymentMethodSelected,
     required this.amount,

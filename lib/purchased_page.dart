@@ -33,6 +33,8 @@ class PurchasedPage extends StatelessWidget {
     },
   ];
 
+  PurchasedPage({super.key});
+
   // Fetch tickets from the server (to be implemented)
   Future<List<Map<String, dynamic>>> fetchTickets() async {
     try {
