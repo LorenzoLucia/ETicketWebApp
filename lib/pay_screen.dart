@@ -1,30 +1,51 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:eticket_web_app/services/api_service.dart';
 
-Future<bool> hasRegisteredPaymentMethods() async {
-  final url = Uri.parse('https://your-server.com/api/payment-methods');
-  try {
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data['hasPaymentMethods'] ?? false;
-    } else {
-      throw Exception('Failed to load payment methods');
-    }
-  } catch (e) {
-    print('Error: $e');
-    // return false;
-    return true; // For debug purposes, always return true
-  }
-}
+// Future<bool> hasRegisteredPaymentMethods() async {
+//   final url = Uri.parse('https://your-server.com/api/payment-methods');
+//   try {
+//     final response = await http.get(url);
+//     if (response.statusCode == 200) {
+//       final data = jsonDecode(response.body);
+//       return data['hasPaymentMethods'] ?? false;
+//     } else {
+//       throw Exception('Failed to load payment methods');
+//     }
+//   } catch (e) {
+//     print('Error: $e');
+//     // return false;
+//     return true; // For debug purposes, always return true
+//   }
+// }
 
-class PayScreen extends StatelessWidget {
+class PayScreen extends StatefulWidget{
   final double amount;
   final int duration;
   final String zone;
   final String? id;
   final String? plate;
+  final ApiService apiService;
+
+  PayScreen({
+    super.key,
+    required this.amount,
+    required this.duration,
+    required this.zone,
+    this.id,
+    this.plate,
+    required this.apiService
+  });
+
+  @override
+  _PayScreenState createState() => _PayScreenState();
+
+}
+
+
+
+class _PayScreenState extends State<PayScreen> {
 
   // final _formKey = GlobalKey<FormState>();
   final TextEditingController cardNumberController = TextEditingController();
@@ -32,13 +53,32 @@ class PayScreen extends StatelessWidget {
   final TextEditingController cvcController = TextEditingController();
 
   // Fake registered payment methods for debug purposes
-  final List<Map<String, String>> fakePaymentMethods = [
+  List<Map<String, String>> paymentMethods = [
     {'name': 'Visa **** 1234', 'id': '1'},
     {'name': 'MasterCard **** 5678', 'id': '2'},
     {'name': 'Amex **** 9012', 'id': '3'},
   ];
 
-  PayScreen({super.key, required this.amount, required this.duration, required this.zone, this.id, this.plate});
+
+  Future<bool> hasRegisteredPaymentMethods() async {
+    return true; // For debug purposes, always return true
+    try {
+      final methods = await widget.apiService.hasRegisteredPaymentMethods();
+      if (methods) {
+        // Fetch the registered payment methods from the server
+        final response = await widget.apiService.fetchPaymentMethods();
+        setState(() {
+          paymentMethods = List<Map<String, String>>.from(response);
+        });
+      }
+      return methods;
+    } catch (e) {
+      // Handle error
+      print('Error loading plates: $e');
+    }
+
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,27 +106,27 @@ class PayScreen extends StatelessWidget {
         } else if (snapshot.hasData && snapshot.data == true) {
           // If payment methods are available, let the user select one
             return PaymentMethodsPage(
-            paymentMethods: fakePaymentMethods,
+            paymentMethods: paymentMethods,
             onPaymentMethodSelected: (selectedMethod) {
               // Handle the selected payment method
               ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Selected ${selectedMethod['name']}')),
               );
             },
-            amount: amount,
-            duration: duration,
-            zone: zone,
-            id: id,
-            plate: plate,
+            amount: widget.amount,
+            duration: widget.duration,
+            zone: widget.zone,
+            id: widget.id,
+            plate: widget.plate,
             );
         } else {
           // If no payment methods are available, show the normal pay screen
             return NewPaymentMethodPage(
-            amount: amount,
-            duration: duration,
-            zone: zone,
-            id: id,
-            plate: plate,
+            amount: widget.amount,
+            duration: widget.duration,
+            zone: widget.zone,
+            id: widget.id,
+            plate: widget.plate,
             );
         }
       },

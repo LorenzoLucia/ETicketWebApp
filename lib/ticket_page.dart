@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/pay_screen.dart';
+import 'package:eticket_web_app/services/api_service.dart';
 
 class TicketPage extends StatefulWidget {
-  const TicketPage({super.key});
+  
+  final ApiService apiService;
+
+  const TicketPage({super.key, required this.apiService});
 
   @override
   _TicketPageState createState() => _TicketPageState();
@@ -15,22 +19,46 @@ class _TicketPageState extends State<TicketPage> {
   String? plate;
 
   // Placeholder zone prices
-  final Map<String, double> zonePrices = {
+  Map<String, double> zonePrices = {
     'Zone A': 2.0,
     'Zone B': 1.5,
     'Zone C': 1.0,
   };
 
   // Fake plates for debugging purposes
-  final List<String> registeredPlates = [
+  List<String> registeredPlates = [
     'ABC123',
     'XYZ789',
   ];
 
+  Future<void> loadRegisteredPlates() async {
+    try {
+      final plates = await widget.apiService.fetchPlates();
+      setState(() {
+        registeredPlates = plates;
+      });
+    } catch (e) {
+      // Handle error
+      print('Error loading plates: $e');
+    }
+  }
+
+  Future<void> loadPrices() async {
+    try {
+      final prices = await widget.apiService.fetchZonePrices();
+      setState(() {
+        zonePrices = prices;
+      });
+    } catch (e) {
+      // Handle error
+      print('Error loading plates: $e');
+    }
+  }
+
   void calculatePrice() {
     if (selectedZone != null) {
       setState(() {
-        price = zonePrices[selectedZone]! * selectedTime;
+        price = zonePrices[selectedZone]! * selectedTime/2;
       });
     }
   }
@@ -71,32 +99,16 @@ class _TicketPageState extends State<TicketPage> {
               'Select End Time:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            DropdownButton<double>(
-              value: selectedTime.toDouble(),
-              hint: Text('Choose end time'),
-              items: List.generate(48, (index) {
-                final now = DateTime.now();
-                final endTime = now.add(Duration(minutes: 30 * (index + 1)));
-                final hours = endTime.hour;
-                final minutes = endTime.minute.toString().padLeft(2, '0');
-                return DropdownMenuItem<double>(
-                  value: (index + 1) * 0.5,
-                  child: Text('$hours:$minutes'),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedTime = (value! * 2).toInt(); // Convert to integer for calculation
-                  calculatePrice();
-                });
-              },
+            Text(
+              'End Time: ${DateTime.now().add(Duration(hours: (selectedTime/2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime/2).toInt(), minutes: 30*(selectedTime%2))).minute.toString().padLeft(2, '0')}',
+              style: TextStyle(fontSize: 16),
             ),
             Slider(
               value: selectedTime.toDouble(),
               min: 0,
-              max: 24,
-              divisions: 23,
-              label: '$selectedTime',
+              max: 46,
+              divisions: 46,
+              label: '${DateTime.now().add(Duration(hours: (selectedTime/2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime/2).toInt(), minutes: 30*(selectedTime%2))).minute.toString().padLeft(2, '0')}',
               onChanged: (value) {
                 setState(() {
                   selectedTime = value.toInt();
@@ -182,6 +194,7 @@ class _TicketPageState extends State<TicketPage> {
                               duration: selectedTime,
                               zone: selectedZone!,
                               plate: plate!,
+                              apiService: widget.apiService,
                             ),
                           ),
                         );

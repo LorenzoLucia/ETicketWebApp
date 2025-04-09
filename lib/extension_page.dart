@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/pay_screen.dart';
+import 'package:eticket_web_app/services/api_service.dart';
 
 class ExtensionPage extends StatefulWidget {
   final String id;
   final String zone;
   final DateTime expirationDateTime;
   final String plate;
+  final ApiService apiService;
 
   const ExtensionPage({super.key, 
     required this.id,
     required this.zone,
     required this.expirationDateTime,
     required this.plate,
+    required this.apiService,
     });
 
   @override
@@ -48,16 +51,28 @@ class _ExtensionPageState extends State<ExtensionPage> {
 
   // Placeholder zone prices
   // This should be replaced with the actual data from the server.
-  final Map<String, double> zonePrices = {
+  Map<String, double> zonePrices = {
     'Zone A': 2.0,
     'Zone B': 1.5,
     'Zone C': 1.0,
   };
 
+  Future<void> loadPrices() async {
+    try {
+      final prices = await widget.apiService.fetchZonePrices();
+      setState(() {
+        zonePrices = prices;
+      });
+    } catch (e) {
+      // Handle error
+      print('Error loading plates: $e');
+    }
+  }
+
   void calculatePrice() {
     if (selectedZone != null) {
       setState(() {
-        price = zonePrices[selectedZone]! * selectedTime;
+        price = zonePrices[selectedZone]! * selectedTime/2;
       });
     }
   }
@@ -82,38 +97,21 @@ class _ExtensionPageState extends State<ExtensionPage> {
               'Select New End Time:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            DropdownButton<double>(
-              value: selectedTime.toDouble(),
-              hint: Text('Choose end time'),
-              items: List.generate(48, (index) {
-              // final now = DateTime.now();
-              // final endTime = now.add(Duration(minutes: 30 * (index + 1)));
-              final endTime = expirationDateTime!.add(Duration(minutes: 30 * (index + 1)));
-              final hours = endTime.hour;
-              final minutes = endTime.minute.toString().padLeft(2, '0');
-              return DropdownMenuItem<double>(
-                value: (index + 1) * 0.5,
-                child: Text('$hours:$minutes'),
-              );
-              }).toList(),
-              onChanged: (value) {
-              setState(() {
-                selectedTime = (value! * 2).toInt(); // Convert to integer for calculation
-                calculatePrice();
-              });
-              },
+            Text(
+              'End Time: ${DateTime.now().add(Duration(hours: (selectedTime/2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime/2).toInt(), minutes: 30*(selectedTime%2))).minute.toString().padLeft(2, '0')}',
+              style: TextStyle(fontSize: 16),
             ),
             Slider(
               value: selectedTime.toDouble(),
               min: 0,
-              max: 24,
-              divisions: 23,
-              label: '$selectedTime',
+              max: 46,
+              divisions: 46,
+              label: '${DateTime.now().add(Duration(hours: (selectedTime/2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime/2).toInt(), minutes: 30*(selectedTime%2))).minute.toString().padLeft(2, '0')}',
               onChanged: (value) {
-              setState(() {
-                selectedTime = value.toInt();
-                calculatePrice();
-              });
+                setState(() {
+                  selectedTime = value.toInt();
+                  calculatePrice();
+                });
               },
             ),
             SizedBox(height: 20),
@@ -136,6 +134,7 @@ class _ExtensionPageState extends State<ExtensionPage> {
                       duration: selectedTime,
                       zone: selectedZone!,
                       id: id!,
+                      apiService: widget.apiService,
                     ),
                     ),
                   );

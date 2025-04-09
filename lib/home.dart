@@ -1,5 +1,6 @@
 // import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:eticket_web_app/profile_page.dart';
+import 'package:eticket_web_app/services/api_service.dart';
 import 'package:eticket_web_app/ticket_page.dart';
 import 'package:eticket_web_app/purchased_page.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:english_words/english_words.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final ApiService apiService;
+  const HomeScreen({super.key, required this.apiService});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class HomeScreen extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         ),
-        home: MyHomePage(),
+        home: MyHomePage(apiService: apiService,),
         // home:PayScreen(),
       ),
     );
@@ -47,7 +49,9 @@ class MyAppState extends ChangeNotifier {
 
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  final ApiService apiService; 
+
+  const MyHomePage({super.key, required this.apiService});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -62,13 +66,13 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = TicketPage();
+        page = TicketPage(apiService: widget.apiService,);
         break;
       case 1:
-        page = PurchasedPage();
+        page = PurchasedPage(apiService:  widget.apiService,);
         break;
       case 2:
-        page = ProfilePage();
+        page = ProfilePage(apiService: widget.apiService,);
         break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');

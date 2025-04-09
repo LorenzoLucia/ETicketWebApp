@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eticket_web_app/services/api_service.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final ApiService apiService;
+  const ProfilePage({super.key, required this.apiService});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -26,31 +28,61 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _fetchProfileData() async {
-    // Simulate fetching data from the server
-    await Future.delayed(Duration(seconds: 1));
-    setState(() {
-      name = 'John';
-      surname = 'Doe';
-      dateOfBirth = '01/01/1990';
-      email = 'john.doe@example.com';
-      username = 'johndoe';
-    });
+    try {
+      // final response = await widget.apiService.fetchProfileData();
+      // setState(() {
+      //   name = response['name'] as String;
+      //   surname = response['surname'] ?? '';
+      //   dateOfBirth = response['dateOfBirth'] ?? '';
+      //   email = response['email'] ?? '';
+      //   username = response['username'] ?? '';
+      // });
+      setState(() {
+        name = 'John';
+        surname = 'Doe';
+        dateOfBirth = '01/01/1990';
+        email = 'john.doe@example.com';
+        username = 'johndoe';
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch profile data')),
+      );
+    }
   }
 
   Future<void> _fetchPaymentMethods() async {
-    // Simulate fetching payment methods from the server
-    await Future.delayed(Duration(seconds: 1));
-    setState(() {
-      paymentMethods = ['Visa **** 1234', 'MasterCard **** 5678'];
-    });
+    try {
+      // final response = await widget.apiService.fetchPaymentMethods();
+      // setState(() {
+      //   paymentMethods = List<String>.from(response);
+      // });
+      setState(() {
+        paymentMethods = ['Visa **** 1234', 'MasterCard **** 5678'];
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch payment methods')),
+      );
+    }
   }
 
   Future<void> _fetchPlates() async {
-    // Simulate fetching registered plates from the server
-    await Future.delayed(Duration(seconds: 1));
-    setState(() {
-      plates = ['AB123CD', 'EF456GH'];
-    });
+    try {
+      // final response = await widget.apiService.fetchPlates(); 
+      // setState(() {
+      //   plates = List<String>.from(response);
+      // });
+      // Simulated data for demonstration
+      await Future.delayed(Duration(seconds: 1));
+      setState(() {
+        plates = ['AB123CD', 'EF456GH'];
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch plates')),
+      );
+    }
   }
 
   void _removePaymentMethod(int index) async {

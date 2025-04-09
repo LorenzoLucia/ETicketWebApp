@@ -12,7 +12,7 @@ void main() async {
   try {
     await dotenv.load(fileName: "assets/.env"); // Debug print statement
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    runApp(const MyApp());
+    runApp(MyApp());
   } catch (e) {
     runApp(MaterialApp(
       home: Scaffold(

@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/extension_page.dart';
+import 'package:eticket_web_app/services/api_service.dart';
 
-class PurchasedPage extends StatelessWidget {
+class PurchasedPage extends StatefulWidget {
+  final ApiService apiService;
+
+  const PurchasedPage({super.key, required this.apiService});
+
+  @override
+  _PurchasedPage createState() => _PurchasedPage();
+}
+
+
+
+class _PurchasedPage extends State<PurchasedPage> {
   // Fake tickets for now
-  final List<Map<String, dynamic>> fakeTickets = [
+  List<Map<String, dynamic>> fakeTickets = [
     {
       'id': '1',
       'plate': 'ABC123',
@@ -33,23 +45,11 @@ class PurchasedPage extends StatelessWidget {
     },
   ];
 
-  PurchasedPage({super.key});
 
   // Fetch tickets from the server (to be implemented)
   Future<List<Map<String, dynamic>>> fetchTickets() async {
     try {
-      // Simulate a network call to fetch tickets from a server
-      await Future.delayed(Duration(seconds: 1)); // Simulate network delay
-
-      // Replace this with actual API call logic
-      // Example:
-      // final response = await http.get(Uri.parse('https://api.example.com/tickets'));
-      // if (response.statusCode == 200) {
-      //   return List<Map<String, dynamic>>.from(json.decode(response.body));
-      // } else {
-      //   throw Exception('Failed to load tickets');
-      // }
-
+      // return await widget.apiService.fetchTickets();
       // For now, return the fakeTickets
       return fakeTickets;
     } catch (e) {
@@ -125,6 +125,7 @@ class PurchasedPage extends StatelessWidget {
                           expirationDateTime: ticket['expirationDateTime'],
                           zone: ticket['zone'],
                           plate: ticket['plate'],
+                          apiService: widget.apiService,
                           ),
                         ),
                         );
