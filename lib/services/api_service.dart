@@ -96,4 +96,84 @@ class ApiService {
     }
   }
 
+  Future<bool> addUser(String username, String email, String role) async {
+
+    final body = jsonEncode({'username': username, 'email': email, 'role': role});
+    final url = Uri.parse('$baseUrl/users/add_users');
+
+    try {
+      final response = await http.post(url, body: body, headers: {'Content-Type': 'application/json'});
+      return response.statusCode == 201;
+    } catch (e) {
+      throw('Error adding user: $e');
+    }
+  }
+
+  Future<bool> removeUser(String username, String role) async {
+
+    final url = Uri.parse('$baseUrl/users/remove_users');
+    final body = jsonEncode({'username': username, 'role': role});
+
+    try {
+      final response = await http.post(url, body: body, headers: {'Content-Type': 'application/json'});
+      return response.statusCode == 201;
+      
+    } catch (e) {
+      throw('Error removing user: $e');
+    }
+  }
+
+  Future<bool> modifyUser(String username, String new_email, String new_role) async {
+
+    final url = Uri.parse('$baseUrl/users/modify_users');
+    final body = jsonEncode({'username': username, 'email': new_email, 'role': new_role});
+
+    try {
+      final response = await http.put(url, body: body, headers: {'Content-Type': 'application/json'});
+      return response.statusCode == 201;
+      }
+    catch (e) {
+      throw('Error modifying user: $e');
+    }
+  }
+
+  Future<bool> addZone(String name, double? price) async {
+
+    final url = Uri.parse('$baseUrl/zones/add_zones');
+    final body = jsonEncode({'zoneName': name, 'price': price});
+
+    try {
+      final response = await http.post(url, body: body, headers: {'Content-Type': 'application/json'});
+      return response.statusCode == 201;
+    } catch (e) {
+      throw('Error adding zone: $e');
+    }
+  }
+
+  Future<bool> removeZone(String name) async {
+
+    final url = Uri.parse('$baseUrl/zones/remove_zones');
+    final body = jsonEncode({'zoneName': name});
+
+    try {
+      final response = await http.post(url, body: body, headers: {'Content-Type': 'application/json'});
+      return response.statusCode == 201;
+    } catch (e) {
+      throw('Error removing zone: $e');
+    }
+  }
+
+  Future<bool> modifyZone(String name, double? price) async {
+
+    final url = Uri.parse('$baseUrl/zones/modify_zones');
+    final body = jsonEncode({'zoneName': name, 'price': price});
+
+    try {
+      final response = await http.put(url, body: body, headers: {'Content-Type': 'application/json'});
+      return response.statusCode == 201;
+    } catch (e) {
+      throw('Error modifying zone: $e');
+    }
+  }
+
 }
