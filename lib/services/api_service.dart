@@ -1,13 +1,24 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ApiService {
   final String baseUrl;
+  Future<String?> getTokenId() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      return await user.getIdToken();
+    }
+    return null;
+  }
 
   ApiService(this.baseUrl);
 
   Future<Map<String, double>> fetchZonePrices() async {
-    final response = await http.get(Uri.parse('$baseUrl/zonePrices'));
+    final tokenId = await getTokenId();
+    final response = await http.get(
+      Uri.parse('$baseUrl/zonePrices'),
+      headers: {'auth': (tokenId ?? '')});
     if (response.statusCode == 200) {
       // setState(() {
       //   zonePrices = Map<String, double>.from(json.decode(response.body));
@@ -20,9 +31,13 @@ class ApiService {
   }
 
   Future<bool> hasRegisteredPaymentMethods() async {
-    final url = Uri.parse('$baseUrl/payment-methods');
+    
     try {
-      final response = await http.get(url);
+      final tokenId = await getTokenId();
+      final url = Uri.parse('$baseUrl/payment-methods');
+      final response = await http.get(
+        url,
+        headers: {'auth': (tokenId ?? '')});
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['hasPaymentMethods'] ?? false;
@@ -38,7 +53,10 @@ class ApiService {
 
   Future<List<Map<String, dynamic>>> fetchTickets() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/tickets'));
+      final tokenId = await getTokenId();
+      final response = await http.get(
+        Uri.parse('$baseUrl/tickets'),
+        headers: {'auth': (tokenId ?? '')});
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(json.decode(response.body));
       } else {
@@ -52,7 +70,10 @@ class ApiService {
 
   Future<Map<String, dynamic>> fetchProfileData() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/profile'));
+      final tokenId = await getTokenId();
+      final response = await http.get(
+        Uri.parse('$baseUrl/profile'),
+        headers: {'auth': (tokenId ?? '')});
       if (response.statusCode == 200) {
         return Map<String, dynamic>.from(json.decode(response.body));
       } else {
@@ -68,7 +89,10 @@ class ApiService {
     try {
       // Simulate an API call to fetch payment methods
       // Example:
-      final response = await http.get(Uri.parse('$baseUrl/payment-methods'));
+      final tokenId = await getTokenId();
+      final response = await http.get(
+        Uri.parse('$baseUrl/payment-methods'),
+        headers: {'auth': (tokenId ?? '')});
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return List<String>.from(data['paymentMethods']);
@@ -83,7 +107,10 @@ class ApiService {
 
   Future<List<String>> fetchPlates() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/plates'));
+      final tokenId = await getTokenId();
+      final response = await http.get(
+        Uri.parse('$baseUrl/plates'),
+        headers: {'auth': (tokenId ?? '')});
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return List<String>.from(data['plates']);
@@ -102,7 +129,10 @@ class ApiService {
     final url = Uri.parse('$baseUrl/users/add_users');
 
     try {
-      final response = await http.post(url, body: body, headers: {'Content-Type': 'application/json'});
+      final response = await http.post(
+        url,
+        body: body,
+        headers: {'Content-Type': 'application/json', 'auth': (await getTokenId() ?? '')});
       return response.statusCode == 201;
     } catch (e) {
       throw('Error adding user: $e');
@@ -115,7 +145,10 @@ class ApiService {
     final body = jsonEncode({'username': username, 'role': role});
 
     try {
-      final response = await http.post(url, body: body, headers: {'Content-Type': 'application/json'});
+      final response = await http.post(
+        url, 
+        body: body,
+        headers: {'Content-Type': 'application/json', 'auth': (await getTokenId() ?? '')});
       return response.statusCode == 201;
       
     } catch (e) {
@@ -129,7 +162,10 @@ class ApiService {
     final body = jsonEncode({'username': username, 'email': new_email, 'role': new_role});
 
     try {
-      final response = await http.put(url, body: body, headers: {'Content-Type': 'application/json'});
+      final response = await http.put(
+        url,
+      body: body,
+      headers: {'Content-Type': 'application/json', 'auth': (await getTokenId() ?? '')});
       return response.statusCode == 201;
       }
     catch (e) {
@@ -143,7 +179,10 @@ class ApiService {
     final body = jsonEncode({'zoneName': name, 'price': price});
 
     try {
-      final response = await http.post(url, body: body, headers: {'Content-Type': 'application/json'});
+      final response = await http.post(
+        url,
+        body: body,
+        headers: {'Content-Type': 'application/json', 'auth': (await getTokenId() ?? '')});
       return response.statusCode == 201;
     } catch (e) {
       throw('Error adding zone: $e');
@@ -169,10 +208,28 @@ class ApiService {
     final body = jsonEncode({'zoneName': name, 'price': price});
 
     try {
-      final response = await http.put(url, body: body, headers: {'Content-Type': 'application/json'});
+      final response = await http.put(
+        url,
+        body: body,
+        headers: {'Content-Type': 'application/json', 'auth': (await getTokenId() ?? '')});
       return response.statusCode == 201;
     } catch (e) {
       throw('Error modifying zone: $e');
+    }
+  }
+
+  Future<bool> sendRegistrationData(Map<String, String> data) async {
+    final url = Uri.parse('$baseUrl/register');
+    final body = jsonEncode(data);
+
+    try {
+      final response = await http.post(
+        url,
+        body: body,
+        headers: {'Content-Type': 'application/json', 'auth': (await getTokenId() ?? '')});
+      return response.statusCode == 201;
+    } catch (e) {
+      throw('Error sending registration data: $e');
     }
   }
 

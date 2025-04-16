@@ -1,7 +1,6 @@
 import 'package:eticket_web_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class CustomerAdminPage extends StatefulWidget {
   final ApiService apiService;
