@@ -17,7 +17,7 @@ class ApiService {
   Future<Map<String, double>> fetchZonePrices() async {
     final tokenId = await getTokenId();
     final response = await http.get(
-      Uri.parse('$baseUrl/zonePrices'),
+      Uri.parse('$baseUrl/zone-prices'),
       headers: {'auth': (tokenId ?? '')});
     if (response.statusCode == 200) {
       // setState(() {
@@ -126,7 +126,7 @@ class ApiService {
   Future<bool> addUser(String username, String email, String role) async {
 
     final body = jsonEncode({'username': username, 'email': email, 'role': role});
-    final url = Uri.parse('$baseUrl/users/add_users');
+    final url = Uri.parse('$baseUrl/users/add-user');
 
     try {
       final response = await http.post(
@@ -141,7 +141,7 @@ class ApiService {
 
   Future<bool> removeUser(String username, String role) async {
 
-    final url = Uri.parse('$baseUrl/users/remove_users');
+    final url = Uri.parse('$baseUrl/users/remove-user');
     final body = jsonEncode({'username': username, 'role': role});
 
     try {
@@ -158,7 +158,7 @@ class ApiService {
 
   Future<bool> modifyUser(String username, String new_email, String new_role) async {
 
-    final url = Uri.parse('$baseUrl/users/modify_users');
+    final url = Uri.parse('$baseUrl/users/edit-user');
     final body = jsonEncode({'username': username, 'email': new_email, 'role': new_role});
 
     try {
@@ -175,7 +175,7 @@ class ApiService {
 
   Future<bool> addZone(String name, double? price) async {
 
-    final url = Uri.parse('$baseUrl/zones/add_zones');
+    final url = Uri.parse('$baseUrl/zones/add-zone');
     final body = jsonEncode({'zoneName': name, 'price': price});
 
     try {
