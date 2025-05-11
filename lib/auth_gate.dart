@@ -11,6 +11,18 @@ class AuthGate extends StatelessWidget {
 
   const AuthGate({super.key, required this.apiService});
 
+  Future<Map<String, dynamic>> getUserData() async {
+    try {
+      return await apiService.getMe();
+    } catch (e) {
+      // Handle errors appropriately
+      return Map<String, dynamic>.from({
+        'error': 'Error fetching user data: $e',
+      });
+      throw Exception('Error fetching user data: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
@@ -18,47 +30,74 @@ class AuthGate extends StatelessWidget {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return SignInScreen(
-        providers: [
-          EmailAuthProvider(),
-          // GoogleProvider(clientId: clientId),
-        ],
-        headerBuilder: (context, constraints, shrinkOffset) {
-          return Padding(
-            padding: const EdgeInsets.all(20),
-            child: AspectRatio(
-          aspectRatio: 1,
-          child: Image.asset('assets/flutterfire_300x.png'),
-            ),
-          );
-        },
-        subtitleBuilder: (context, action) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: action == AuthAction.signIn
-            ? const Text('Welcome to FlutterFire, please sign in!')
-            : const Text('Welcome to Flutterfire, please sign up!'),
-          );
-        },
-        footerBuilder: (context, action) {
-          return const Padding(
-            padding: EdgeInsets.only(top: 16),
-            child: Text(
-          'By signing in, you agree to our terms and conditions.',
-          style: TextStyle(color: Colors.grey),
-            ),
-          );
-        },
+            providers: [
+              EmailAuthProvider(),
+              // GoogleProvider(clientId: clientId),
+            ],
+            headerBuilder: (context, constraints, shrinkOffset) {
+              return Padding(
+                padding: const EdgeInsets.all(20),
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Image.asset('assets/flutterfire_300x.png'),
+                ),
+              );
+            },
+            subtitleBuilder: (context, action) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: action == AuthAction.signIn
+                    ? const Text('Welcome to FlutterFire, please sign in!')
+                    : const Text('Welcome to Flutterfire, please sign up!'),
+              );
+            },
+            footerBuilder: (context, action) {
+              return const Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Text(
+                  'By signing in, you agree to our terms and conditions.',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              );
+            },
           );
         }
 
         final user = snapshot.data!;
-        if (user.metadata.creationTime == user.metadata.lastSignInTime) {
-          // User just registered
-          return RegistrationPage(apiService: apiService);
-        } else {
-          // User logged in
-          return HomeScreen(apiService: apiService);
-        }
+        return FutureBuilder<Map<String, dynamic>>(
+          future: getUserData(),
+          builder: (context, userDataSnapshot) {
+            if (userDataSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (userDataSnapshot.hasError) {
+              return Center(
+                child: Text('Error: ${userDataSnapshot.error}'),
+              );
+            }
+
+            final data = userDataSnapshot.data!;
+            print(data);
+            if (data['isRegistered'] == false) {
+              // User not registered
+              return RegistrationPage(apiService: apiService, userData: data);
+            }
+
+            if (data['isRegistered'] == true) {
+              // User registered but no payment methods
+              return HomeScreen(apiService: apiService, userData: data,);
+            }
+
+            if (user.metadata.creationTime == user.metadata.lastSignInTime) {
+              // User just registered
+              return RegistrationPage(apiService: apiService, userData: data);
+            } else {
+              // User logged in
+              return HomeScreen(apiService: apiService, userData: data);
+            }
+          },
+        );
       },
     );
   }

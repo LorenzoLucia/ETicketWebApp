@@ -126,7 +126,7 @@ class ApiService {
   Future<bool> addUser(String username, String email, String role) async {
 
     final body = jsonEncode({'username': username, 'email': email, 'role': role});
-    final url = Uri.parse('$baseUrl/users/add_users');
+    final url = Uri.parse('$baseUrl/users');
 
     try {
       final response = await http.post(
@@ -139,13 +139,13 @@ class ApiService {
     }
   }
 
-  Future<bool> removeUser(String username, String role) async {
+  Future<bool> removeUser(String uid) async {
 
-    final url = Uri.parse('$baseUrl/users/remove_users');
-    final body = jsonEncode({'username': username, 'role': role});
+    final url = Uri.parse('$baseUrl/users/$uid');
+    final body = jsonEncode({});
 
     try {
-      final response = await http.post(
+      final response = await http.delete(
         url, 
         body: body,
         headers: {'Content-Type': 'application/json', 'auth': (await getTokenId() ?? '')});
@@ -156,9 +156,9 @@ class ApiService {
     }
   }
 
-  Future<bool> modifyUser(String username, String new_email, String new_role) async {
+  Future<bool> modifyUser(String uid, String username, String new_email, String new_role) async {
 
-    final url = Uri.parse('$baseUrl/users/modify_users');
+    final url = Uri.parse('$baseUrl/users/$uid');
     final body = jsonEncode({'username': username, 'email': new_email, 'role': new_role});
 
     try {
@@ -173,9 +173,9 @@ class ApiService {
     }
   }
 
-  Future<bool> addZone(String name, double? price) async {
+  Future<bool> addZone(String ZoneId, String name, double? price) async {
 
-    final url = Uri.parse('$baseUrl/zones/add_zones');
+    final url = Uri.parse('$baseUrl/zones/$ZoneId');
     final body = jsonEncode({'zoneName': name, 'price': price});
 
     try {
@@ -189,22 +189,22 @@ class ApiService {
     }
   }
 
-  Future<bool> removeZone(String name) async {
+  Future<bool> removeZone(String ZoneId) async {
 
-    final url = Uri.parse('$baseUrl/zones/remove_zones');
-    final body = jsonEncode({'zoneName': name});
+    final url = Uri.parse('$baseUrl/zones/$ZoneId');
+    final body = jsonEncode({});
 
     try {
-      final response = await http.post(url, body: body, headers: {'Content-Type': 'application/json'});
+      final response = await http.delete(url, body: body, headers: {'Content-Type': 'application/json', 'auth': (await getTokenId() ?? '')});
       return response.statusCode == 201;
     } catch (e) {
       throw('Error removing zone: $e');
     }
   }
 
-  Future<bool> modifyZone(String name, double? price) async {
+  Future<bool> modifyZone(String ZoneId, String name, double? price) async {
 
-    final url = Uri.parse('$baseUrl/zones/modify_zones');
+    final url = Uri.parse('$baseUrl/zones/$ZoneId');
     final body = jsonEncode({'zoneName': name, 'price': price});
 
     try {
@@ -230,6 +230,24 @@ class ApiService {
       return response.statusCode == 201;
     } catch (e) {
       throw('Error sending registration data: $e');
+    }
+  }
+
+  Future<Map<String,dynamic>> getMe() async{
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/get-me');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'auth': (tokenId ?? '')});
+      if (response.statusCode == 200) {
+        return Map<String,dynamic>.from(json.decode(response.body));
+      } else {
+        throw Exception('Failed to load user data');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Failed to load user data');
     }
   }
 

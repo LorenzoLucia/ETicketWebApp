@@ -4,8 +4,9 @@ import 'package:eticket_web_app/home.dart';
 
 class RegistrationPage extends StatefulWidget {
   final ApiService apiService;
+  final Map<String, dynamic> userData;
 
-  const RegistrationPage({Key? key, required this.apiService}) : super(key: key);
+  const RegistrationPage({Key? key, required this.apiService, required this.userData}) : super(key: key);
 
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
@@ -34,7 +35,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeScreen(apiService: widget.apiService),
+            builder: (context) => HomeScreen(apiService: widget.apiService, userData: widget.userData),
           ),
         );
       } catch (e) {

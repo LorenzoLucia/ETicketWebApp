@@ -4,21 +4,25 @@ import 'dart:convert';
 
 class CustomerAdminPage extends StatefulWidget {
   final ApiService apiService;
+  final Map<String, dynamic> userData;
 
-  CustomerAdminPage({super.key, required this.apiService});
+  CustomerAdminPage({super.key, required this.apiService, required this.userData});
   @override
   _CustomerAdminPageState createState() => _CustomerAdminPageState();
 }
 
 class _CustomerAdminPageState extends State<CustomerAdminPage> {
+  final TextEditingController _idController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _roleController = TextEditingController();
 
+  final TextEditingController _zoneIdController = TextEditingController();
   final TextEditingController _zoneNameController = TextEditingController();
   final TextEditingController _zonePriceController = TextEditingController();
 
   void _addUser() async {
+    final id = _idController.text;
     final username = _usernameController.text;
     final email = _emailController.text;
     final role = _roleController.text;
@@ -31,60 +35,60 @@ class _CustomerAdminPageState extends State<CustomerAdminPage> {
   }
 
   void _removeUser() async {
-    final username = _usernameController.text;
-    final role = _roleController.text;
+    final id = _idController.text;
 
     try {
-      final response = await widget.apiService.removeUser(username, role);
+      final response = await widget.apiService.removeUser(id);
     } catch (e) {
       print('Error removing user: $e');
     }
   }
 
   void _modifyUser() async {
+    final id = _idController.text;
     final username = _usernameController.text;
     final email = _emailController.text;
     final role = _roleController.text;
 
-    final body = jsonEncode({'email': email, 'role': role});
+    // final body = jsonEncode({'username': username, 'email': email, 'role': role});
 
     try {
-      final response = await widget.apiService.modifyUser(username, body, role);
+      final response = await widget.apiService.modifyUser(id, username, email, role);
     } catch (e) {
       print('Error modifying user: $e');
     }
   }
 
   void _addZone() async {
+    final id = _zoneIdController.text;
     final zoneName = _zoneNameController.text;
     final zonePrice = _zonePriceController.text;
 
-    final body = jsonEncode({'zoneName': zoneName, 'price': double.tryParse(zonePrice)});
-
     try {
-      final response = await widget.apiService.addZone(zoneName, double.tryParse(zonePrice));
+      final response = await widget.apiService.addZone(id, zoneName, double.tryParse(zonePrice));
     } catch (e) {
       print('Error adding zone: $e');
     }
   }
 
   void _removeZone() async {
-    final zoneName = _zoneNameController.text;
+    final id = _zoneIdController.text;
+    final name = _zoneNameController.text;
 
     try {
-      final response = await widget.apiService.removeZone(zoneName);
-      
+      final response = await widget.apiService.removeZone(id);
     } catch (e) {
       print('Error removing zone: $e');
     }
   }
 
   void _modifyZone() async {
+    final id = _zoneIdController.text;
     final zoneName = _zoneNameController.text;
     final zonePrice = _zonePriceController.text;
 
     try {
-      final response = await widget.apiService.modifyZone(zoneName, double.tryParse(zonePrice));
+      final response = await widget.apiService.modifyZone(id, zoneName, double.tryParse(zonePrice));
     } catch (e) {
       print('Error modifying zone: $e');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error modifying zone')));
@@ -103,6 +107,10 @@ class _CustomerAdminPageState extends State<CustomerAdminPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Manage Users', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            TextField(
+              controller: _idController,
+              decoration: InputDecoration(labelText: 'User ID'),
+            ),
             TextField(
               controller: _usernameController,
               decoration: InputDecoration(labelText: 'Username'),
@@ -135,6 +143,10 @@ class _CustomerAdminPageState extends State<CustomerAdminPage> {
             ),
             Divider(height: 40, thickness: 2),
             Text('Manage Parking Zones', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            TextField(
+              controller: _zoneIdController,
+              decoration: InputDecoration(labelText: 'Zone ID'),
+            ),
             TextField(
               controller: _zoneNameController,
               decoration: InputDecoration(labelText: 'Zone Name'),

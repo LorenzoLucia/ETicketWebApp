@@ -6,14 +6,32 @@ import 'package:eticket_web_app/purchased_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:english_words/english_words.dart';
+import 'package:eticket_web_app/ca_page.dart';
+import 'package:eticket_web_app/sa_page.dart';
 
 class HomeScreen extends StatelessWidget {
   final ApiService apiService;
+  final Map<String, dynamic> userData;
 
-  const HomeScreen({super.key, required this.apiService});
+  const HomeScreen({super.key, required this.apiService, required this.userData});
 
   @override
   Widget build(BuildContext context) {
+    Widget homePage;
+
+    switch (userData['authority']) {
+      case 'ca':
+        homePage = CustomerAdminPage(apiService: apiService, userData: this.userData); // Replace with your CA page widget
+        break;
+      case 'sa':
+        homePage = SystemAdminPage(apiService: apiService, userData:this.userData); // Replace with your SA page widget
+        break;
+      case 'user':
+      default:
+        homePage = MyHomePage(apiService: apiService);
+        break;
+    }
+
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
@@ -22,8 +40,7 @@ class HomeScreen extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         ),
-        home: MyHomePage(apiService: apiService,),
-        // home:PayScreen(),
+        home: homePage,
       ),
     );
   }
