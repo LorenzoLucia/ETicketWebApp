@@ -13,9 +13,15 @@ class AuthGate extends StatelessWidget {
 
   Future<Map<String, dynamic>> getUserData() async {
     try {
-      return await apiService.getMe();
+      return await apiService.getMe().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          // Handle timeout appropriately
+          throw Exception('Request timed out');
+        },
+      );
     } catch (e) {
-      // Handle errors appropriately
+      // Handle other errors appropriately
       return Map<String, dynamic>.from({
         'error': 'Error fetching user data: $e',
       });
@@ -72,8 +78,35 @@ class AuthGate extends StatelessWidget {
             }
 
             if (userDataSnapshot.hasError) {
-              return Center(
-                child: Text('Error: ${userDataSnapshot.error}'),
+              return SignInScreen(
+                providers: [
+                  EmailAuthProvider(),
+                  // GoogleProvider(clientId: clientId),
+                ],
+                headerBuilder: (context, constraints, shrinkOffset) {
+                  return Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Image.asset('assets/flutterfire_300x.png'),
+                    ),
+                  );
+                },
+                subtitleBuilder: (context, action) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: const Text('An error occurred. Please try signing in again.'),
+                  );
+                },
+                footerBuilder: (context, action) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Text(
+                      'By signing in, you agree to our terms and conditions.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  );
+                },
               );
             }
 

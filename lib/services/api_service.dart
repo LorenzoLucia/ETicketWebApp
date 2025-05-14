@@ -123,6 +123,25 @@ class ApiService {
     }
   }
 
+  Future<List<Map<String,dynamic>>> getUsers() async {
+
+
+    final url = Uri.parse('$baseUrl/users');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json', 'auth': (await getTokenId() ?? '')});
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(json.decode(response.body));
+      } else {
+        throw Exception('Failed to load users');
+      }
+    } catch (e) {
+      throw('Error fetching users: $e');
+    }
+  }
+
   Future<bool> addUser(String username, String email, String role) async {
 
     final body = jsonEncode({'username': username, 'email': email, 'role': role});
@@ -170,6 +189,25 @@ class ApiService {
       }
     catch (e) {
       throw('Error modifying user: $e');
+    }
+  }
+
+  Future<List<Map<String,dynamic>>> getZones() async {
+
+
+    final url = Uri.parse('$baseUrl/zones');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json', 'auth': (await getTokenId() ?? '')});
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(json.decode(response.body));
+      } else {
+        throw Exception('Failed to load zones');
+      }
+    } catch (e) {
+      throw('Error fetching zones: $e');
     }
   }
 

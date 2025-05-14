@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:english_words/english_words.dart';
 import 'package:eticket_web_app/ca_page.dart';
-import 'package:eticket_web_app/sa_page.dart';
 
 class HomeScreen extends StatelessWidget {
   final ApiService apiService;
@@ -21,14 +20,15 @@ class HomeScreen extends StatelessWidget {
 
     switch (userData['authority']) {
       case 'ca':
-        homePage = CustomerAdminPage(apiService: apiService, userData: this.userData); // Replace with your CA page widget
+        homePage = CustomerAdminPage(apiService: apiService, userData: userData); // Replace with your CA page widget
         break;
       case 'sa':
-        homePage = SystemAdminPage(apiService: apiService, userData:this.userData); // Replace with your SA page widget
+        homePage = CustomerAdminPage(apiService: apiService, userData: userData); // Replace with your SA page widget
         break;
       case 'user':
       default:
         homePage = MyHomePage(apiService: apiService);
+        // homePage = CustomerAdminPage(apiService: apiService, userData: userData);
         break;
     }
 

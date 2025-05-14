@@ -1,6 +1,7 @@
 import 'package:eticket_web_app/services/api_service.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
+import 'package:eticket_web_app/users_managment_page.dart';
+import 'package:eticket_web_app/services/api_service.dart';
 
 class CustomerAdminPage extends StatefulWidget {
   final ApiService apiService;
@@ -12,171 +13,136 @@ class CustomerAdminPage extends StatefulWidget {
 }
 
 class _CustomerAdminPageState extends State<CustomerAdminPage> {
-  final TextEditingController _idController = TextEditingController();
+  var selectedIndex = 0;
+
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _roleController = TextEditingController();
-
-  final TextEditingController _zoneIdController = TextEditingController();
-  final TextEditingController _zoneNameController = TextEditingController();
-  final TextEditingController _zonePriceController = TextEditingController();
-
-  void _addUser() async {
-    final id = _idController.text;
-    final username = _usernameController.text;
-    final email = _emailController.text;
-    final role = _roleController.text;
-
-    try {
-      final response = await widget.apiService.addUser(username, email, role);
-    } catch (e) {
-      print('Error adding user: $e');
-    }
-  }
-
-  void _removeUser() async {
-    final id = _idController.text;
-
-    try {
-      final response = await widget.apiService.removeUser(id);
-    } catch (e) {
-      print('Error removing user: $e');
-    }
-  }
-
-  void _modifyUser() async {
-    final id = _idController.text;
-    final username = _usernameController.text;
-    final email = _emailController.text;
-    final role = _roleController.text;
-
-    // final body = jsonEncode({'username': username, 'email': email, 'role': role});
-
-    try {
-      final response = await widget.apiService.modifyUser(id, username, email, role);
-    } catch (e) {
-      print('Error modifying user: $e');
-    }
-  }
-
-  void _addZone() async {
-    final id = _zoneIdController.text;
-    final zoneName = _zoneNameController.text;
-    final zonePrice = _zonePriceController.text;
-
-    try {
-      final response = await widget.apiService.addZone(id, zoneName, double.tryParse(zonePrice));
-    } catch (e) {
-      print('Error adding zone: $e');
-    }
-  }
-
-  void _removeZone() async {
-    final id = _zoneIdController.text;
-    final name = _zoneNameController.text;
-
-    try {
-      final response = await widget.apiService.removeZone(id);
-    } catch (e) {
-      print('Error removing zone: $e');
-    }
-  }
-
-  void _modifyZone() async {
-    final id = _zoneIdController.text;
-    final zoneName = _zoneNameController.text;
-    final zonePrice = _zonePriceController.text;
-
-    try {
-      final response = await widget.apiService.modifyZone(id, zoneName, double.tryParse(zonePrice));
-    } catch (e) {
-      print('Error modifying zone: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error modifying zone')));
-    }
-  }
+  final TextEditingController _passwordController = TextEditingController();
+  String _selectedRole = 'User';
+  final List<String> _roles = ['User', 'Admin', 'Manager'];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Customer Administrator Page'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Manage Users', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            TextField(
-              controller: _idController,
-              decoration: InputDecoration(labelText: 'User ID'),
-            ),
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _roleController,
-              decoration: InputDecoration(labelText: 'Role'),
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: _addUser,
-                  child: Text('Add User'),
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = UsersManagementPage(apiService: widget.apiService,);
+        break;
+      case 1:
+        page = UsersManagementPage(apiService: widget.apiService,);
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          body: Row(
+            children: [
+              SafeArea(
+                child: NavigationRail(
+                  extended: constraints.maxWidth >= 600,
+                  destinations: [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.person),
+                      label: Text('Users'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.map),
+                      label: Text('Zones'),
+                    ),
+                  ],
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: (value) {
+                    setState(() {
+                      selectedIndex = value;
+                    });
+                  },
                 ),
-                ElevatedButton(
-                  onPressed: _removeUser,
-                  child: Text('Remove User'),
+              ),
+              Expanded(
+                child: Container(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: Column(
+                    children: [
+                      Expanded(child: page),
+                      Divider(),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Add New User',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            SizedBox(height: 16),
+                            TextField(
+                              controller: _usernameController,
+                              decoration: InputDecoration(
+                                labelText: 'Username',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            TextField(
+                              controller: _emailController,
+                              decoration: InputDecoration(
+                                labelText: 'Email',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            TextField(
+                              controller: _passwordController,
+                              obscureText: true,
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            DropdownButtonFormField<String>(
+                              value: _selectedRole,
+                              items: _roles.map((role) {
+                                return DropdownMenuItem(
+                                  value: role,
+                                  child: Text(role),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedRole = value!;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                labelText: 'Role',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                // Handle user addition logic here
+                                print('Username: ${_usernameController.text}');
+                                print('Email: ${_emailController.text}');
+                                print('Password: ${_passwordController.text}');
+                                print('Role: $_selectedRole');
+                              },
+                              child: Text('Add User'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                ElevatedButton(
-                  onPressed: _modifyUser,
-                  child: Text('Modify User'),
-                ),
-              ],
-            ),
-            Divider(height: 40, thickness: 2),
-            Text('Manage Parking Zones', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            TextField(
-              controller: _zoneIdController,
-              decoration: InputDecoration(labelText: 'Zone ID'),
-            ),
-            TextField(
-              controller: _zoneNameController,
-              decoration: InputDecoration(labelText: 'Zone Name'),
-            ),
-            TextField(
-              controller: _zonePriceController,
-              decoration: InputDecoration(labelText: 'Zone Price'),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: _addZone,
-                  child: Text('Add Zone'),
-                ),
-                ElevatedButton(
-                  onPressed: _removeZone,
-                  child: Text('Remove Zone'),
-                ),
-                ElevatedButton(
-                  onPressed: _modifyZone,
-                  child: Text('Modify Zone'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
