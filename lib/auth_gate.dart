@@ -52,9 +52,10 @@ class AuthGate extends StatelessWidget {
             subtitleBuilder: (context, action) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: action == AuthAction.signIn
-                    ? const Text('Welcome to FlutterFire, please sign in!')
-                    : const Text('Welcome to Flutterfire, please sign up!'),
+                child:
+                    action == AuthAction.signIn
+                        ? const Text('Welcome to FlutterFire, please sign in!')
+                        : const Text('Welcome to Flutterfire, please sign up!'),
               );
             },
             footerBuilder: (context, action) {
@@ -95,7 +96,9 @@ class AuthGate extends StatelessWidget {
                 subtitleBuilder: (context, action) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: const Text('An error occurred. Please try signing in again.'),
+                    child: const Text(
+                      'An error occurred. Please try signing in again.',
+                    ),
                   );
                 },
                 footerBuilder: (context, action) {
@@ -114,20 +117,32 @@ class AuthGate extends StatelessWidget {
             print(data);
             if (data['isRegistered'] == false) {
               // User not registered
-              return RegistrationPage(apiService: apiService, userData: data);
+              return RegistrationPage(
+                apiService: apiService,
+                userData: data["user_data"],
+              );
             }
 
             if (data['isRegistered'] == true) {
               // User registered but no payment methods
-              return HomeScreen(apiService: apiService, userData: data,);
+              return HomeScreen(
+                apiService: apiService,
+                userData: data["user_data"],
+              );
             }
 
             if (user.metadata.creationTime == user.metadata.lastSignInTime) {
               // User just registered
-              return RegistrationPage(apiService: apiService, userData: data);
+              return RegistrationPage(
+                apiService: apiService,
+                userData: data["user_data"],
+              );
             } else {
               // User logged in
-              return HomeScreen(apiService: apiService, userData: data);
+              return HomeScreen(
+                apiService: apiService,
+                userData: data["user_data"],
+              );
             }
           },
         );

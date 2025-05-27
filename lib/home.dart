@@ -12,20 +12,30 @@ class HomeScreen extends StatelessWidget {
   final ApiService apiService;
   final Map<String, dynamic> userData;
 
-  const HomeScreen({super.key, required this.apiService, required this.userData});
+  const HomeScreen({
+    super.key,
+    required this.apiService,
+    required this.userData,
+  });
 
   @override
   Widget build(BuildContext context) {
     Widget homePage;
 
-    switch (userData['authority']) {
-      case 'ca':
-        homePage = CustomerAdminPage(apiService: apiService, userData: userData); // Replace with your CA page widget
+    switch (userData['role']) {
+      case 'CUSTOMER_ADMINISTRATOR':
+        homePage = CustomerAdminPage(
+          apiService: apiService,
+          userData: userData,
+        ); // Replace with your CA page widget
         break;
-      case 'sa':
-        homePage = CustomerAdminPage(apiService: apiService, userData: userData); // Replace with your SA page widget
+      case 'SYSTEM_ADMINISTRATOR':
+        homePage = CustomerAdminPage(
+          apiService: apiService,
+          userData: userData,
+        ); // Replace with your SA page widget
         break;
-      case 'user':
+      case 'CUSTOMER':
       default:
         homePage = MyHomePage(apiService: apiService);
         // homePage = CustomerAdminPage(apiService: apiService, userData: userData);
@@ -49,14 +59,14 @@ class HomeScreen extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
 
-  void getNext(){
+  void getNext() {
     current = WordPair.random();
     notifyListeners();
   }
 
   var favorites = <WordPair>[];
-  void toggleFavorite(){
-    if(favorites.contains(current)){
+  void toggleFavorite() {
+    if (favorites.contains(current)) {
       favorites.remove(current);
     } else {
       favorites.add(current);
@@ -65,9 +75,8 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
-
 class MyHomePage extends StatefulWidget {
-  final ApiService apiService; 
+  final ApiService apiService;
 
   const MyHomePage({super.key, required this.apiService});
 
@@ -76,7 +85,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   var selectedIndex = 0;
 
   @override
@@ -84,17 +92,17 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = TicketPage(apiService: widget.apiService,);
+        page = TicketPage(apiService: widget.apiService);
         break;
       case 1:
-        page = PurchasedPage(apiService:  widget.apiService,);
+        page = PurchasedPage(apiService: widget.apiService);
         break;
       case 2:
-        page = ProfilePage(apiService: widget.apiService,);
+        page = ProfilePage(apiService: widget.apiService);
         break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');
-    } 
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -135,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         );
-      }
+      },
     );
   }
 }
