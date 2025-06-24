@@ -256,7 +256,7 @@ class ApiService {
     }
   }
 
-  Future<bool> sendRegistrationData(Map<String, String> data) async {
+  Future<bool> sendRegistrationData(Map<String, String?> data) async {
     final url = Uri.parse('$baseUrl/register');
     final body = jsonEncode(data);
 
