@@ -115,35 +115,35 @@ class AuthGate extends StatelessWidget {
 
             final data = userDataSnapshot.data!;
             print(data);
-            if (data['isRegistered'] == false) {
+            if (data['is_registered'] == false) {
               // User not registered
-              return RegistrationPage(
-                apiService: apiService,
-                userData: data["user_data"],
-              );
-            }
-
-            if (data['isRegistered'] == true) {
-              // User registered but no payment methods
-              return HomeScreen(
-                apiService: apiService,
-                userData: data["user_data"],
-              );
-            }
-
-            if (user.metadata.creationTime == user.metadata.lastSignInTime) {
-              // User just registered
+              print('User not registered');
               return RegistrationPage(
                 apiService: apiService,
                 userData: data["user_data"],
               );
             } else {
-              // User logged in
+              // User registered but no payment methods
+              print('User registered');
               return HomeScreen(
                 apiService: apiService,
                 userData: data["user_data"],
               );
             }
+
+            // if (user.metadata.creationTime == user.metadata.lastSignInTime) {
+            //   // User just registered
+            //   return RegistrationPage(
+            //     apiService: apiService,
+            //     userData: data["user_data"],
+            //   );
+            // } else {
+            //   // User logged in
+            //   return HomeScreen(
+            //     apiService: apiService,
+            //     userData: data["user_data"],
+            //   );
+            // }
           },
         );
       },

@@ -28,7 +28,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
     _focusNode.addListener(() async {
       if (_focusNode.hasFocus) {
         await _pickDate(context);
-        _focusNode.unfocus();
+        // _focusNode.unfocus();
+        _focusNode.nextFocus();
       }
     });
   }

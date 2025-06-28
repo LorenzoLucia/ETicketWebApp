@@ -39,8 +39,8 @@ class HomeScreen extends StatelessWidget {
       case 'CUSTOMER':
       default:
         homePage = MyHomePage(apiService: apiService);
-        homePage = CustomerAdminPage(apiService: apiService, userData: userData);
-        homePage = ParkingControllerPage(apiService: apiService,);
+        // homePage = CustomerAdminPage(apiService: apiService, userData: userData);
+        // homePage = ParkingControllerPage(apiService: apiService,);
         break;
     }
 
