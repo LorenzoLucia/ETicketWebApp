@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:english_words/english_words.dart';
 import 'package:eticket_web_app/ca_page.dart';
+import 'package:eticket_web_app/controller_page.dart';
 
 class HomeScreen extends StatelessWidget {
   final ApiService apiService;
@@ -38,7 +39,8 @@ class HomeScreen extends StatelessWidget {
       case 'CUSTOMER':
       default:
         homePage = MyHomePage(apiService: apiService);
-        // homePage = CustomerAdminPage(apiService: apiService, userData: userData);
+        homePage = CustomerAdminPage(apiService: apiService, userData: userData);
+        homePage = ParkingControllerPage(apiService: apiService,);
         break;
     }
 

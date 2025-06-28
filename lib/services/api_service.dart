@@ -289,4 +289,36 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> checkTicketStatus(String plate) async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/tickets/$plate');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'auth': (tokenId ?? '')});
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(json.decode(response.body));
+      } else {
+        throw Exception('Failed to check ticket status');
+      }
+    } catch (e) {
+      throw Exception('Error checking ticket status: $e');
+    }
+  }
+
+  Future<bool> submitFine(String plate) async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/fines');
+    final body = jsonEncode({'plate': plate, 'timestamp': DateTime.now().toIso8601String()});
+    try {
+      final response = await http.post(
+        url,
+        body: body,
+        headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')});
+      return response.statusCode == 201;
+    } catch (e) {
+      throw Exception('Error submitting fine: $e');
+    }
+  }
+
 }
