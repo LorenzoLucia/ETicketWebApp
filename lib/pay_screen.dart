@@ -22,7 +22,7 @@ import 'package:eticket_web_app/services/api_service.dart';
 
 class PayScreen extends StatefulWidget {
   final double amount;
-  final int duration;
+  final double duration;
   final String zone;
   final String? id;
   final String? plate;

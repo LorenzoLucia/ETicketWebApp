@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/pay_screen.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'wheel_time_picker_widget.dart';
 
 class TicketPage extends StatefulWidget {
-  
   final ApiService apiService;
 
   const TicketPage({super.key, required this.apiService});
@@ -14,11 +14,12 @@ class TicketPage extends StatefulWidget {
 
 class _TicketPageState extends State<TicketPage> {
   String? selectedZone;
-  int selectedTime = 1; // Default to 1 hour
+  double selectedTime = 1; // Default to 1
   double price = 0.0;
   String? plate;
   Map<String, double> zonePrices = {};
   List<String> registeredPlates = [];
+  DateTime now = DateTime.now();
 
   // // Placeholder zone prices
   // Map<String, double> zonePrices = {
@@ -53,7 +54,6 @@ class _TicketPageState extends State<TicketPage> {
       setState(() {
         zonePrices = prices;
       });
-      
     } catch (e) {
       // Handle error
       print('Error loading zones: $e');
@@ -63,7 +63,9 @@ class _TicketPageState extends State<TicketPage> {
   void calculatePrice() {
     if (selectedZone != null) {
       setState(() {
-        price = zonePrices[selectedZone]! * selectedTime/2;
+        price = double.parse(
+          (zonePrices[selectedZone]! * selectedTime).toStringAsFixed(1),
+        );
       });
     }
   }
@@ -78,9 +80,7 @@ class _TicketPageState extends State<TicketPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Select Parking Zone and Time'),
-      ),
+      appBar: AppBar(title: Text('Select Parking Zone and Time')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -93,12 +93,13 @@ class _TicketPageState extends State<TicketPage> {
             DropdownButton<String>(
               value: selectedZone,
               hint: Text('Choose a zone'),
-              items: zonePrices.keys.map((zone) {
-                return DropdownMenuItem<String>(
-                  value: zone,
-                  child: Text(zone),
-                );
-              }).toList(),
+              items:
+                  zonePrices.keys.map((zone) {
+                    return DropdownMenuItem<String>(
+                      value: zone,
+                      child: Text(zone),
+                    );
+                  }).toList(),
               onChanged: (value) {
                 setState(() {
                   selectedZone = value;
@@ -107,28 +108,26 @@ class _TicketPageState extends State<TicketPage> {
               },
             ),
             SizedBox(height: 20),
+
             Text(
               'Select End Time:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text(
-              'End Time: ${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt(), minutes: 30 * (selectedTime % 2))).minute.toString().padLeft(2, '0')}',
-              style: TextStyle(fontSize: 16),
-            ),
-            Slider(
-              value: selectedTime.toDouble(),
-              min: 0,
-              max: 46,
-              divisions: 46,
-              label: '${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt(), minutes: 30 * (selectedTime % 2))).minute.toString().padLeft(2, '0')}',
-              onChanged: (value) {
+
+            SizedBox(height: 20),
+
+            TimePickerTextField(
+              initialTime: Duration(hours: now.hour, minutes: now.minute),
+              onTimeChanged: (double value) {
                 setState(() {
-                  selectedTime = value.toInt();
-                  calculatePrice();
+                  selectedTime = value;
                 });
+                calculatePrice();
               },
             ),
+
             SizedBox(height: 20),
+
             Text(
               'Enter or Select Plate:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -164,34 +163,34 @@ class _TicketPageState extends State<TicketPage> {
                         ),
                         actions: [
                           TextButton(
-                          onPressed: () {
-                            setState(() {
-                            plate = newPlate;
-                            if (!registeredPlates.contains(newPlate)) {
-                              registeredPlates.add(newPlate);
-                            }
-                            });
-                            Navigator.of(context).pop();
-                          },
-                          child: Text('OK'),
+                            onPressed: () {
+                              setState(() {
+                                plate = newPlate;
+                                if (!registeredPlates.contains(newPlate)) {
+                                  registeredPlates.add(newPlate);
+                                }
+                              });
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('OK'),
                           ),
                           TextButton(
-                          onPressed: () async {
-                            try {
-                            await widget.apiService.addPlate(newPlate);
-                            setState(() {
-                              plate = newPlate;
-                              if (!registeredPlates.contains(newPlate)) {
-                              registeredPlates.add(newPlate);
+                            onPressed: () async {
+                              try {
+                                await widget.apiService.addPlate(newPlate);
+                                setState(() {
+                                  plate = newPlate;
+                                  if (!registeredPlates.contains(newPlate)) {
+                                    registeredPlates.add(newPlate);
+                                  }
+                                });
+                                Navigator.of(context).pop();
+                              } catch (e) {
+                                // Handle error
+                                print('Error saving plate: $e');
                               }
-                            });
-                            Navigator.of(context).pop();
-                            } catch (e) {
-                            // Handle error
-                            print('Error saving plate: $e');
-                            }
-                          },
-                          child: Text('Save'),
+                            },
+                            child: Text('Save'),
                           ),
                         ],
                       );
@@ -214,22 +213,24 @@ class _TicketPageState extends State<TicketPage> {
             Spacer(),
             Center(
               child: ElevatedButton(
-                onPressed: selectedZone != null && plate != null
-                    ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PayScreen(
-                              amount: price,
-                              duration: selectedTime,
-                              zone: selectedZone!,
-                              plate: plate!,
-                              apiService: widget.apiService,
+                onPressed:
+                    selectedZone != null && plate != null
+                        ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => PayScreen(
+                                    amount: price,
+                                    duration: selectedTime,
+                                    zone: selectedZone!,
+                                    plate: plate!,
+                                    apiService: widget.apiService,
+                                  ),
                             ),
-                          ),
-                        );
-                      }
-                    : null,
+                          );
+                        }
+                        : null,
                 child: Text('Proceed to Payment'),
               ),
             ),

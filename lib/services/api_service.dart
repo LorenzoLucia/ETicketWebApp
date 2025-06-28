@@ -415,6 +415,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> getMe() async {
     final tokenId = await getTokenId();
+    print(tokenId);
     final url = Uri.parse('$baseUrl/get-me');
     try {
       final response = await http.get(url, headers: {'auth': (tokenId ?? '')});

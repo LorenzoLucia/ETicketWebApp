@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/pay_screen.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:eticket_web_app/wheel_time_picker_widget.dart';
 
 class ExtensionPage extends StatefulWidget {
   final String id;
@@ -9,13 +10,14 @@ class ExtensionPage extends StatefulWidget {
   final String plate;
   final ApiService apiService;
 
-  const ExtensionPage({super.key, 
+  const ExtensionPage({
+    super.key,
     required this.id,
     required this.zone,
     required this.expirationDateTime,
     required this.plate,
     required this.apiService,
-    });
+  });
 
   @override
   _ExtensionPageState createState() => _ExtensionPageState();
@@ -23,11 +25,12 @@ class ExtensionPage extends StatefulWidget {
 
 class _ExtensionPageState extends State<ExtensionPage> {
   String? selectedZone;
-  int selectedTime = 1; // Default to 1 hour
+  double selectedTime = 1; // Default to 1 hour
   double price = 0.0;
   String? id;
   DateTime? expirationDateTime;
-  
+  DateTime now = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +78,9 @@ class _ExtensionPageState extends State<ExtensionPage> {
   void calculatePrice() {
     if (selectedZone != null) {
       setState(() {
-        price = zonePrices[selectedZone]! * selectedTime/2;
+        price = double.parse(
+          (zonePrices[selectedZone]! * selectedTime).toStringAsFixed(1),
+        );
       });
     }
   }
@@ -83,14 +88,12 @@ class _ExtensionPageState extends State<ExtensionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Select extension time.'),
-      ),
+      appBar: AppBar(title: Text('Select extension time.')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
               '$selectedZone',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -100,54 +103,68 @@ class _ExtensionPageState extends State<ExtensionPage> {
               'Select New End Time:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text(
-              'End Time: ${DateTime.now().add(Duration(hours: (selectedTime/2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime/2).toInt(), minutes: 30*(selectedTime%2))).minute.toString().padLeft(2, '0')}',
-              style: TextStyle(fontSize: 16),
-            ),
-            Slider(
-              value: selectedTime.toDouble(),
-              min: 0,
-              max: 46,
-              divisions: 46,
-              label: '${DateTime.now().add(Duration(hours: (selectedTime/2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime/2).toInt(), minutes: 30*(selectedTime%2))).minute.toString().padLeft(2, '0')}',
-              onChanged: (value) {
+
+            // Text(
+            //   'End Time: ${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt(), minutes: 30 * (selectedTime % 2))).minute.toString().padLeft(2, '0')}',
+            //   style: TextStyle(fontSize: 16),
+            // ),
+            // Slider(
+            //   value: selectedTime.toDouble(),
+            //   min: 0,
+            //   max: 46,
+            //   divisions: 46,
+            //   label:
+            //       '${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt(), minutes: 30 * (selectedTime % 2))).minute.toString().padLeft(2, '0')}',
+            //   onChanged: (value) {
+            //     setState(() {
+            //       selectedTime = value.toInt();
+            //       calculatePrice();
+            //     });
+            //   },
+            // ),
+            TimePickerTextField(
+              initialTime: Duration(hours: now.hour, minutes: now.minute),
+              onTimeChanged: (double value) {
                 setState(() {
-                  selectedTime = value.toInt();
-                  calculatePrice();
+                  selectedTime = value;
                 });
+                calculatePrice();
               },
             ),
+
             SizedBox(height: 20),
             Text(
               selectedZone != null
-                ? 'Price: \$${price.toStringAsFixed(2)}'
-                : 'Please select a zone to see the price',
+                  ? 'Price: \$${price.toStringAsFixed(2)}'
+                  : 'Please select a zone to see the price',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Spacer(),
             Center(
               child: ElevatedButton(
-              onPressed: selectedZone != null
-                ? () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                    builder: (context) => PayScreen(
-                      amount: price,
-                      duration: selectedTime,
-                      zone: selectedZone!,
-                      id: id!,
-                      apiService: widget.apiService,
-                      plate: widget.plate,
-                    ),
-                    ),
-                  );
-                  }
-                : null,
-              child: Text('Proceed to Payment'),
+                onPressed:
+                    selectedZone != null
+                        ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => PayScreen(
+                                    amount: price,
+                                    duration: selectedTime,
+                                    zone: selectedZone!,
+                                    id: id!,
+                                    apiService: widget.apiService,
+                                    plate: widget.plate,
+                                  ),
+                            ),
+                          );
+                        }
+                        : null,
+                child: Text('Proceed to Payment'),
               ),
             ),
-            ],
+          ],
         ),
       ),
     );
