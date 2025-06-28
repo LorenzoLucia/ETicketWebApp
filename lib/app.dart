@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'auth_gate.dart';
 
-final baseUrl = 'http://localhost:5000'; // Replace with your actual base URL
+final baseUrl = 'http://localhost:5001'; // Replace with your actual base URL
 
 class MyApp extends StatelessWidget {
   final ApiService apiService = ApiService(baseUrl);

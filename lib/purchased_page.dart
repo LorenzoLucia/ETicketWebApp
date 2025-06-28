@@ -15,41 +15,41 @@ class PurchasedPage extends StatefulWidget {
 
 class _PurchasedPage extends State<PurchasedPage> {
   // Fake tickets for now
-  List<Map<String, dynamic>> fakeTickets = [
-    {
-      'id': '1',
-      'plate': 'ABC123',
-      'zone': 'Zone A',
-      'price': 10.0,
-      'startDateTime': DateTime.now(),
-      'expirationDateTime': DateTime.now().add(Duration(hours: 2)),
-      'status': 'active',
-    },
-    {
-      'id': '2',
-      'plate': 'XYZ789',
-      'zone': 'Zone B',
-      'price': 15.0,
-      'startDateTime': DateTime.now().subtract(Duration(days: 1)),
-      'expirationDateTime': DateTime.now().subtract(Duration(hours: 22)),
-      'status': 'expired',
-    },
-    {
-      'id': '3',
-      'plate': 'LMN456',
-      'zone': 'Zone C',
-      'price': 20.0,
-      'startDateTime': DateTime.now().add(Duration(days: 1)),
-      'expirationDateTime': DateTime.now().add(Duration(days: 1, hours: 3)),
-      'status': 'active',
-    },
-  ];
+  // List<Map<String, dynamic>> fakeTickets = [
+  //   {
+  //     'id': '1',
+  //     'plate': 'ABC123',
+  //     'zone': 'Zone A',
+  //     'price': 10.0,
+  //     'startDateTime': DateTime.now(),
+  //     'expirationDateTime': DateTime.now().add(Duration(hours: 2)),
+  //     'status': 'active',
+  //   },
+  //   {
+  //     'id': '2',
+  //     'plate': 'XYZ789',
+  //     'zone': 'Zone B',
+  //     'price': 15.0,
+  //     'startDateTime': DateTime.now().subtract(Duration(days: 1)),
+  //     'expirationDateTime': DateTime.now().subtract(Duration(hours: 22)),
+  //     'status': 'expired',
+  //   },
+  //   {
+  //     'id': '3',
+  //     'plate': 'LMN456',
+  //     'zone': 'Zone C',
+  //     'price': 20.0,
+  //     'startDateTime': DateTime.now().add(Duration(days: 1)),
+  //     'expirationDateTime': DateTime.now().add(Duration(days: 1, hours: 3)),
+  //     'status': 'active',
+  //   },
+  // ];
 
 
   // Fetch tickets from the server (to be implemented)
   Future<List<Map<String, dynamic>>> fetchTickets() async {
     try {
-      // return await widget.apiService.fetchTickets();
+      final response  = await widget.apiService.fetchTickets();
       // For now, return the fakeTickets
       return fakeTickets;
     } catch (e) {

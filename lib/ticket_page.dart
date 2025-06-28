@@ -17,19 +17,21 @@ class _TicketPageState extends State<TicketPage> {
   int selectedTime = 1; // Default to 1 hour
   double price = 0.0;
   String? plate;
+  Map<String, double> zonePrices = {};
+  List<String> registeredPlates = [];
 
-  // Placeholder zone prices
-  Map<String, double> zonePrices = {
-    'Zone A': 2.0,
-    'Zone B': 1.5,
-    'Zone C': 1.0,
-  };
+  // // Placeholder zone prices
+  // Map<String, double> zonePrices = {
+  //   'Zone A': 2.0,
+  //   'Zone B': 1.5,
+  //   'Zone C': 1.0,
+  // };
 
-  // Fake plates for debugging purposes
-  List<String> registeredPlates = [
-    'ABC123',
-    'XYZ789',
-  ];
+  // // Fake plates for debugging purposes
+  // List<String> registeredPlates = [
+  //   'ABC123',
+  //   'XYZ789',
+  // ];
 
   Future<void> loadRegisteredPlates() async {
     try {
@@ -37,6 +39,7 @@ class _TicketPageState extends State<TicketPage> {
       setState(() {
         registeredPlates = plates;
       });
+      print('Registered plates loaded: $registeredPlates');
     } catch (e) {
       // Handle error
       print('Error loading plates: $e');
@@ -46,12 +49,14 @@ class _TicketPageState extends State<TicketPage> {
   Future<void> loadPrices() async {
     try {
       final prices = await widget.apiService.fetchZonePrices();
+      print('Zone prices loaded: $prices');
       setState(() {
         zonePrices = prices;
       });
+      
     } catch (e) {
       // Handle error
-      print('Error loading plates: $e');
+      print('Error loading zones: $e');
     }
   }
 
@@ -61,6 +66,13 @@ class _TicketPageState extends State<TicketPage> {
         price = zonePrices[selectedZone]! * selectedTime/2;
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadRegisteredPlates();
+    loadPrices();
   }
 
   @override
@@ -100,7 +112,7 @@ class _TicketPageState extends State<TicketPage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
-              'End Time: ${DateTime.now().add(Duration(hours: (selectedTime/2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime/2).toInt(), minutes: 30*(selectedTime%2))).minute.toString().padLeft(2, '0')}',
+              'End Time: ${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt(), minutes: 30 * (selectedTime % 2))).minute.toString().padLeft(2, '0')}',
               style: TextStyle(fontSize: 16),
             ),
             Slider(
@@ -108,7 +120,7 @@ class _TicketPageState extends State<TicketPage> {
               min: 0,
               max: 46,
               divisions: 46,
-              label: '${DateTime.now().add(Duration(hours: (selectedTime/2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime/2).toInt(), minutes: 30*(selectedTime%2))).minute.toString().padLeft(2, '0')}',
+              label: '${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt())).hour}:${DateTime.now().add(Duration(hours: (selectedTime / 2).toInt(), minutes: 30 * (selectedTime % 2))).minute.toString().padLeft(2, '0')}',
               onChanged: (value) {
                 setState(() {
                   selectedTime = value.toInt();
@@ -152,16 +164,34 @@ class _TicketPageState extends State<TicketPage> {
                         ),
                         actions: [
                           TextButton(
-                            onPressed: () {
-                              setState(() {
-                                plate = newPlate;
-                                if (!registeredPlates.contains(newPlate)) {
-                                  registeredPlates.add(newPlate);
-                                }
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('OK'),
+                          onPressed: () {
+                            setState(() {
+                            plate = newPlate;
+                            if (!registeredPlates.contains(newPlate)) {
+                              registeredPlates.add(newPlate);
+                            }
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('OK'),
+                          ),
+                          TextButton(
+                          onPressed: () async {
+                            try {
+                            await widget.apiService.addPlate(newPlate);
+                            setState(() {
+                              plate = newPlate;
+                              if (!registeredPlates.contains(newPlate)) {
+                              registeredPlates.add(newPlate);
+                              }
+                            });
+                            Navigator.of(context).pop();
+                            } catch (e) {
+                            // Handle error
+                            print('Error saving plate: $e');
+                            }
+                          },
+                          child: Text('Save'),
                           ),
                         ],
                       );

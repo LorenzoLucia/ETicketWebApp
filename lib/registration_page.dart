@@ -1,3 +1,4 @@
+import 'package:eticket_web_app/auth_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
 import 'package:eticket_web_app/home.dart';
@@ -47,8 +48,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeScreen(apiService: widget.apiService, userData: widget.userData),
-          ),
+            // builder: (context) => HomeScreen(apiService: widget.apiService, userData: widget.userData),
+            builder: (context) => AuthGate(
+              apiService: widget.apiService,
+            ),
+          )
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -51,27 +51,28 @@ class _PayScreenState extends State<PayScreen> {
   final TextEditingController cardNumberController = TextEditingController();
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
+  List<Map<String, String>> paymentMethods = [];
 
   // Fake registered payment methods for debug purposes
-  List<Map<String, String>> paymentMethods = [
-    {'name': 'Visa **** 1234', 'id': '1'},
-    {'name': 'MasterCard **** 5678', 'id': '2'},
-    {'name': 'Amex **** 9012', 'id': '3'},
-  ];
+  // List<Map<String, String>> paymentMethods = [
+  //   {'name': 'Visa **** 1234', 'id': '1'},
+  //   {'name': 'MasterCard **** 5678', 'id': '2'},
+  //   {'name': 'Amex **** 9012', 'id': '3'},
+  // ];
 
 
   Future<bool> hasRegisteredPaymentMethods() async {
-    return true; // For debug purposes, always return true
+    // return true; // For debug purposes, always return true
     try {
-      final methods = await widget.apiService.hasRegisteredPaymentMethods();
-      if (methods) {
+      final methods = await widget.apiService.fetchPaymentMethods();
+      if (methods.isNotEmpty) {
         // Fetch the registered payment methods from the server
-        final response = await widget.apiService.fetchPaymentMethods();
         setState(() {
-          paymentMethods = List<Map<String, String>>.from(response);
+          paymentMethods = List<Map<String, String>>.from(methods);
         });
+        return true;
       }
-      return methods;
+      return false;
     } catch (e) {
       // Handle error
       print('Error loading plates: $e');
@@ -103,14 +104,14 @@ class _PayScreenState extends State<PayScreen> {
               child: Text('Error loading payment methods'),
             ),
           );
-        } else if (snapshot.hasData && snapshot.data == true) {
-          // If payment methods are available, let the user select one
-            return PaymentMethodsPage(
+        } else {
+          // Always show the payment methods page, allowing the user to add a new method if needed
+          return PaymentMethodsPage(
             paymentMethods: paymentMethods,
             onPaymentMethodSelected: (selectedMethod) {
               // Handle the selected payment method
               ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Selected ${selectedMethod['name']}')),
+                SnackBar(content: Text('Selected ${selectedMethod['name']}')),
               );
             },
             amount: widget.amount,
@@ -118,23 +119,15 @@ class _PayScreenState extends State<PayScreen> {
             zone: widget.zone,
             id: widget.id,
             plate: widget.plate,
-            );
-        } else {
-          // If no payment methods are available, show the normal pay screen
-            return NewPaymentMethodPage(
-            amount: widget.amount,
-            duration: widget.duration,
-            zone: widget.zone,
-            id: widget.id,
-            plate: widget.plate,
-            );
+            apiService: widget.apiService,
+          );
         }
       },
     );
   }
 }
 
-class NewPaymentMethodPage extends StatelessWidget{
+class NewPaymentMethodPage extends StatelessWidget {
   final double amount;
   final int duration;
   final String zone;
@@ -144,128 +137,209 @@ class NewPaymentMethodPage extends StatelessWidget{
   final TextEditingController cardNumberController = TextEditingController();
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
-  
-  NewPaymentMethodPage({super.key, required this.amount, required this.duration, required this.zone, this.id, this.plate});
+  final ApiService apiService;
+
+  NewPaymentMethodPage({
+    super.key,
+    required this.amount,
+    required this.duration,
+    required this.zone,
+    this.id,
+    this.plate,
+    required this.apiService,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            appBar: AppBar(
-              title: Text('Payment'),
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Amount to Pay: \$${amount.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 16),
-                    TextFormField(
-                      controller: cardNumberController,
-                      decoration: InputDecoration(
-                        labelText: 'Card Number',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your card number';
+      appBar: AppBar(
+        title: Text('Add Payment Method'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Amount to Pay: \$${amount.toStringAsFixed(2)}',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: cardNumberController,
+                decoration: InputDecoration(
+                  labelText: 'Card Number',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your card number';
+                  }
+                  if (value.length != 16) {
+                    return 'Card number must be 16 digits';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: expiryDateController,
+                decoration: InputDecoration(
+                  labelText: 'Expiry Date (MM/YY)',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.datetime,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the expiry date';
+                  }
+                  if (!RegExp(r'^(0[1-9]|1[0-2])\/\d{2}$').hasMatch(value)) {
+                    return 'Enter a valid expiry date (MM/YY)';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: cvcController,
+                decoration: InputDecoration(
+                  labelText: 'CVC',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the CVC';
+                  }
+                  if (value.length != 3) {
+                    return 'CVC must be 3 digits';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 24),
+              Center(
+                child: ElevatedButton(
+                  child: Text('Pay Now'),
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      try {
+                        final methodId = await apiService.addPaymentMethod(
+                          cardNumberController.text,
+                          expiryDateController.text,
+                          cvcController.text,
+                        );
+                        if (methodId != null) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => PayNowPage(
+                                methodId: methodId,
+                                amount: amount,
+                                duration: duration,
+                                zone: zone,
+                                id: id,
+                                plate: plate,
+                                apiService: apiService,
+                              ),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to register payment method. Please try again.')),
+                          );
                         }
-                        if (value.length != 16) {
-                          return 'Card number must be 16 digits';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16),
-                    TextFormField(
-                      controller: expiryDateController,
-                      decoration: InputDecoration(
-                        labelText: 'Expiry Date (MM/YY)',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.datetime,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter the expiry date';
-                        }
-                        if (!RegExp(r'^(0[1-9]|1[0-2])\/\d{2}$').hasMatch(value)) {
-                          return 'Enter a valid expiry date (MM/YY)';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16),
-                    TextFormField(
-                      controller: cvcController,
-                      decoration: InputDecoration(
-                        labelText: 'CVC',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      obscureText: true,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter the CVC';
-                        }
-                        if (value.length != 3) {
-                          return 'CVC must be 3 digits';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 24),
-                    Center(
-                      child: ElevatedButton(
-                        child: Text('Pay Now'),
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            final url = Uri.parse('https://your-server.com/api/register-payment-method');
-                            try {
-                              final response = await http.post(
-                                url,
-                                headers: {'Content-Type': 'application/json'},
-                                body: jsonEncode({
-                                  'cardNumber': cardNumberController.text,
-                                  'expiryDate': expiryDateController.text,
-                                  'cvc': cvcController.text,
-                                  'amount': amount,
-                                  'duration': duration,
-                                  'zone': zone,
-                                  'ticket_id': id!,
-                                  'plate': plate,
-                                }),
-                              );
-
-                              if (response.statusCode == 200) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Payment method registered successfully. Processing payment...')),
-                                );
-                                // Proceed with payment logic here
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed to register payment method. Please try again.')),
-                                );
-                              }
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Error: impossible connection to the server')),
-                              );
-                            }
-                          }
-                        },
-                      ),
-                    ),
-                  ],
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error registering payment method: $e')),
+                        );
+                      }
+                    }
+                  },
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PayNowPage extends StatelessWidget {
+  final String methodId;
+  final double amount;
+  final int duration;
+  final String zone;
+  final String? id;
+  final String? plate;
+  final ApiService apiService;
+
+  PayNowPage({
+    super.key,
+    required this.methodId,
+    required this.amount,
+    required this.duration,
+    required this.zone,
+    this.id,
+    this.plate,
+    required this.apiService,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Confirm Payment'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Amount to Pay: \$${amount.toStringAsFixed(2)}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-          );
+            SizedBox(height: 24),
+            Center(
+              child: ElevatedButton(
+                child: Text('Confirm Payment'),
+                onPressed: () async {
+                  try {
+                    final success = await apiService.payTicket(
+                      plate ?? '',
+                      methodId,
+                      amount.toString(),
+                      duration.toString(),
+                      zone,
+                      id,
+                    );
+                    if (success) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Payment successful!')),
+                      );
+                      Navigator.of(context).popUntil((route) => route.isFirst); // Navigate back to the home page
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Payment failed. Please try again.')),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error processing payment: $e')),
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -278,6 +352,7 @@ class PaymentMethodsPage extends StatelessWidget {
   final String zone;
   final String? id;
   final String? plate;
+  final ApiService apiService;
 
   const PaymentMethodsPage({super.key, 
     required this.paymentMethods,
@@ -287,6 +362,7 @@ class PaymentMethodsPage extends StatelessWidget {
     required this.zone,
     this.id,
     this.plate,
+    required this.apiService
   });
 
   @override
@@ -312,6 +388,7 @@ class PaymentMethodsPage extends StatelessWidget {
               zone: zone,
               id: id,
               plate: plate,
+              apiService: apiService,
             ),
             ),
           );
@@ -333,41 +410,26 @@ class PaymentMethodsPage extends StatelessWidget {
               child: Text('Cancel'),
               ),
               TextButton(
-              onPressed: () async {
+              onPressed: () {
                 Navigator.of(context).pop();
-                final url = Uri.parse('https://your-server.com/api/process-payment');
-                try {
-                final response = await http.post(
-                  url,
-                  headers: {'Content-Type': 'application/json'},
-                  body: jsonEncode({
-                  'paymentMethodId': method['id'],
-                  'amount': (context.findAncestorWidgetOfExactType<PayScreen>() as PayScreen).amount,
-                  'duration': (context.findAncestorWidgetOfExactType<PayScreen>() as PayScreen).duration,
-                  'zone': (context.findAncestorWidgetOfExactType<PayScreen>() as PayScreen).zone,
-                  'ticket_id': (context.findAncestorWidgetOfExactType<PayScreen>() as PayScreen).id,
-                  'plate': (context.findAncestorWidgetOfExactType<PayScreen>() as PayScreen).plate,
-                  }),
+                Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => PayNowPage(
+                  methodId: method['id']!,
+                  amount: amount,
+                  duration: duration,
+                  zone: zone,
+                  id: id,
+                  plate: plate,
+                  apiService: apiService,
+                  ),
+                ),
                 );
-
-                if (response.statusCode == 200) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Payment processed successfully.')),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Failed to process payment. Please try again.')),
-                  );
-                }
-                } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
-                );
-                }
               },
               child: Text('Yes'),
               ),
             ],
+            
             ),
           );
           },

@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class ApiService {
   final String baseUrl;
+  late String user_id;
+
   Future<String?> getTokenId() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -12,50 +14,56 @@ class ApiService {
     return null;
   }
 
+  setUserId(String uid) {
+    user_id = uid;
+  }
+
   ApiService(this.baseUrl);
 
   Future<Map<String, double>> fetchZonePrices() async {
     final tokenId = await getTokenId();
     final response = await http.get(
-      Uri.parse('$baseUrl/zonePrices'),
+      Uri.parse('$baseUrl/zones'),
       headers: {'auth': (tokenId ?? '')});
     if (response.statusCode == 200) {
-      // setState(() {
-      //   zonePrices = Map<String, double>.from(json.decode(response.body));
-      // });
+      Map<String, double> zonePrices = {};
+      final data = jsonDecode(response.body);
+      for (var zone in data) {
+        zonePrices[zone['name']] = double.parse(zone['price']);
+      }
 
-      return Map<String, double>.from(json.decode(response.body));
+      return zonePrices;
     } else {
       throw Exception('Failed to load zone prices');
     }
   }
 
-  Future<bool> hasRegisteredPaymentMethods() async {
+  // Future<bool> hasRegisteredPaymentMethods() async {
     
-    try {
-      final tokenId = await getTokenId();
-      final url = Uri.parse('$baseUrl/payment-methods');
-      final response = await http.get(
-        url,
-        headers: {'auth': (tokenId ?? '')});
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['hasPaymentMethods'] ?? false;
-      } else {
-        throw Exception('Failed to load payment methods');
-      }
-    } catch (e) {
-      print('Error: $e');
-      // return false;
-      return true; // For debug purposes, always return true
-    }
-  }
+  //   try {
+  //     final tokenId = await getTokenId();
+  //     final url = Uri.parse('$baseUrl/$user_id/payment-methods');
+  //     final response = await http.get(
+  //       url,
+  //       headers: {'auth': (tokenId ?? '')});
+  //     if (response.statusCode == 200) {
+  //       final data = jsonDecode(response.body);
+  //       return data['hasPaymentMethods'] ?? false;
+  //     } else {
+  //       throw Exception('Failed to load payment methods');
+  //     }
+  //   } catch (e) {
+  //     print('Error: $e');
+  //     // return false;
+  //     return true; // For debug purposes, always return true
+  //   }
+  // }
 
   Future<List<Map<String, dynamic>>> fetchTickets() async {
     try {
       final tokenId = await getTokenId();
       final response = await http.get(
-        Uri.parse('$baseUrl/tickets'),
+        Uri.parse('$baseUrl/$user_id/tickets'),
         headers: {'auth': (tokenId ?? '')});
       if (response.statusCode == 200) {
         return List<Map<String, dynamic>>.from(json.decode(response.body));
@@ -68,34 +76,32 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> fetchProfileData() async {
-    try {
-      final tokenId = await getTokenId();
-      final response = await http.get(
-        Uri.parse('$baseUrl/profile'),
-        headers: {'auth': (tokenId ?? '')});
-      if (response.statusCode == 200) {
-        return Map<String, dynamic>.from(json.decode(response.body));
-      } else {
-        throw Exception('Failed to load tickets');
-      }
-    } catch (e) {
-      // Handle errors appropriately
-      throw Exception('Error fetching tickets: $e');
-    }
-  }
+  // Future<Map<String, dynamic>> fetchProfileData() async {
+  //   try {
+  //     final tokenId = await getTokenId();
+  //     final response = await http.get(
+  //       Uri.parse('$baseUrl/profile'),
+  //       headers: {'auth': (tokenId ?? '')});
+  //     if (response.statusCode == 200) {
+  //       return Map<String, dynamic>.from(json.decode(response.body));
+  //     } else {
+  //       throw Exception('Failed to load tickets');
+  //     }
+  //   } catch (e) {
+  //     // Handle errors appropriately
+  //     throw Exception('Error fetching tickets: $e');
+  //   }
+  // }
 
   Future<List<String>> fetchPaymentMethods() async {
     try {
-      // Simulate an API call to fetch payment methods
-      // Example:
       final tokenId = await getTokenId();
       final response = await http.get(
-        Uri.parse('$baseUrl/payment-methods'),
+        Uri.parse('$baseUrl/users/$user_id/payment-methods'),
         headers: {'auth': (tokenId ?? '')});
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return List<String>.from(data['paymentMethods']);
+        return List<String>.from(data);
       } else {
         throw Exception('Failed to load payment methods');
       }
@@ -105,21 +111,60 @@ class ApiService {
     }
   }
 
+  Future<String> addPaymentMethod(String cardNumber, String expiry, String cvc) async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/$user_id/payment-methods');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
+        body: jsonEncode({
+          'cardNumber': cardNumber,
+          'expiryDate': expiry,
+          'cvc': cvc,
+        }),
+      );
+      if (response.statusCode == 201) {
+        return response.body; // Assuming the response contains the ID of the added payment method
+      } else {
+        throw Exception('Failed to add payment method');
+      }
+    } catch (e) {
+      throw Exception('Error adding payment method: $e');
+    }
+  }
+
   Future<List<String>> fetchPlates() async {
     try {
       final tokenId = await getTokenId();
       final response = await http.get(
-        Uri.parse('$baseUrl/plates'),
+        Uri.parse('$baseUrl/users/$user_id/plates'),
         headers: {'auth': (tokenId ?? '')});
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return List<String>.from(data['plates']);
+        print(data);
+        return List<String>.from(data);
       } else {
         throw Exception('Failed to load plates');
       }
     }catch (e) {
       // Handle errors appropriately
-      throw Exception('Error fetching tickets: $e');
+      throw Exception('Error fetching plates: $e');
+    }
+  }
+
+  Future<void> addPlate(String plate) async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/users/$user_id/plates');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
+        body: jsonEncode({'plate': plate}),
+      );
+      return;
+    } catch (e) {
+      throw Exception('Error adding plate: $e');
     }
   }
 
@@ -289,6 +334,7 @@ class ApiService {
     }
   }
 
+  // TO BE IMPLEMENTED IN BackEnd //
   Future<Map<String, dynamic>> checkTicketStatus(String plate) async {
     final tokenId = await getTokenId();
     final url = Uri.parse('$baseUrl/tickets/$plate');
@@ -318,6 +364,29 @@ class ApiService {
       return response.statusCode == 201;
     } catch (e) {
       throw Exception('Error submitting fine: $e');
+    }
+  }
+
+  Future<bool> payTicket(String plate, String methodId, String amount, String duration, String zone, String? id) async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/$user_id/pay');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
+        body: jsonEncode({
+          'payment_method_id': methodId,
+          'amount': amount,
+          'duration': duration,
+          'zone': zone,
+          'ticket_id': id!,
+          'plate': plate,
+        }),
+      );
+
+      return response.statusCode == 201;
+    } catch (e) {
+      throw Exception('Error paying ticket: $e');
     }
   }
 

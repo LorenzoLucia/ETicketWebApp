@@ -7,21 +7,25 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:english_words/english_words.dart';
 import 'package:eticket_web_app/ca_page.dart';
-import 'package:eticket_web_app/controller_page.dart';
 
 class HomeScreen extends StatelessWidget {
   final ApiService apiService;
   final Map<String, dynamic> userData;
+  final String uid;
 
   const HomeScreen({
     super.key,
     required this.apiService,
     required this.userData,
+    required this.uid,
   });
+
 
   @override
   Widget build(BuildContext context) {
     Widget homePage;
+
+    apiService.setUserId(uid);
 
     switch (userData['role']) {
       case 'CUSTOMER_ADMINISTRATOR':

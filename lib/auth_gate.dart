@@ -25,7 +25,6 @@ class AuthGate extends StatelessWidget {
       return Map<String, dynamic>.from({
         'error': 'Error fetching user data: $e',
       });
-      throw Exception('Error fetching user data: $e');
     }
   }
 
@@ -128,6 +127,7 @@ class AuthGate extends StatelessWidget {
               return HomeScreen(
                 apiService: apiService,
                 userData: data["user_data"],
+                uid: data["user_id"],
               );
             }
 
