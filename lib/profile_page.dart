@@ -4,14 +4,15 @@ import 'package:eticket_web_app/services/api_service.dart';
 
 class ProfilePage extends StatefulWidget {
   final ApiService apiService;
-  const ProfilePage({super.key, required this.apiService});
+  final Map<String, dynamic> userData;
+  const ProfilePage({super.key, required this.apiService, required this.userData});
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  List<String> paymentMethods = [];
+  List<Map<String,String>> paymentMethods = [];
   List<String> plates = [];
   String name = '';
   String surname = '';
@@ -22,44 +23,24 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _fetchProfileData();
+    name = widget.userData['name'];
+    surname = widget.userData['surname'];
+    dateOfBirth = widget.userData['birth_date'].toString();
+    email = widget.userData['email'];
     _fetchPaymentMethods();
     _fetchPlates();
   }
 
-  Future<void> _fetchProfileData() async {
-    try {
-      // final response = await widget.apiService.fetchProfileData();
-      // setState(() {
-      //   name = response['name'] as String;
-      //   surname = response['surname'] ?? '';
-      //   dateOfBirth = response['dateOfBirth'] ?? '';
-      //   email = response['email'] ?? '';
-      //   username = response['username'] ?? '';
-      // });
-      setState(() {
-        name = 'John';
-        surname = 'Doe';
-        dateOfBirth = '01/01/1990';
-        email = 'john.doe@example.com';
-        username = 'johndoe';
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch profile data')),
-      );
-    }
-  }
-
   Future<void> _fetchPaymentMethods() async {
     try {
-      // final response = await widget.apiService.fetchPaymentMethods();
-      // setState(() {
-      //   paymentMethods = List<String>.from(response);
-      // });
+      final response = await widget.apiService.fetchPaymentMethods();
+      print('Payment Methods: $response');
       setState(() {
-        paymentMethods = ['Visa **** 1234', 'MasterCard **** 5678'];
+        paymentMethods = response;
       });
+      // setState(() {
+      //   paymentMethods = ['Visa **** 1234', 'MasterCard **** 5678'];
+      // });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to fetch payment methods')),
@@ -69,15 +50,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _fetchPlates() async {
     try {
-      // final response = await widget.apiService.fetchPlates(); 
-      // setState(() {
-      //   plates = List<String>.from(response);
-      // });
-      // Simulated data for demonstration
-      await Future.delayed(Duration(seconds: 1));
+      final response = await widget.apiService.fetchPlates(); 
       setState(() {
-        plates = ['AB123CD', 'EF456GH'];
+        plates = List<String>.from(response);
       });
+      // Simulated data for demonstration
+      // await Future.delayed(Duration(seconds: 1));
+      // setState(() {
+      //   plates = ['AB123CD', 'EF456GH'];
+      // });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to fetch plates')),
@@ -108,10 +89,8 @@ class _ProfilePageState extends State<ProfilePage> {
       // Simulate sending an HTTP request to remove the payment method
       try {
         // Example: await http.delete(Uri.parse('https://api.example.com/payment-methods/$index'));
-        await Future.delayed(Duration(seconds: 1)); // Simulate network delay
-        setState(() {
-          paymentMethods.removeAt(index);
-        });
+        await widget.apiService.removePaymentMethod(paymentMethods[index]['id']??''); // Simulate network delay
+        _fetchPaymentMethods();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Payment method removed successfully')),
         );
@@ -146,10 +125,8 @@ class _ProfilePageState extends State<ProfilePage> {
       // Simulate sending an HTTP request to remove the plate
       try {
         // Example: await http.delete(Uri.parse('https://api.example.com/plates/$index'));
-        await Future.delayed(Duration(seconds: 1)); // Simulate network delay
-        setState(() {
-          plates.removeAt(index);
-        });
+        await widget.apiService.removePlate(plates[index]); // Simulate network delay
+        _fetchPlates();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Plate removed successfully')),
         );
@@ -172,10 +149,8 @@ class _ProfilePageState extends State<ProfilePage> {
     // Simulate sending an HTTP request to add the plate
     try {
       // Example: await http.post(Uri.parse('https://api.example.com/plates'), body: {'plate': plate});
-      await Future.delayed(Duration(seconds: 1)); // Simulate network delay
-      setState(() {
-        plates.add(plate);
-      });
+      await widget.apiService.addPlate(plate); // Simulate network delay
+      _fetchPlates();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Plate added successfully')),
       );
@@ -190,128 +165,142 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      title: Text('Profile Page'),
+        title: Text('Profile Page'),
       ),
       body: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ListView(
-        children: [
-        Text(
-          'Personal Information',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 10),
-        ListTile(
-          title: Text('Name'),
-          subtitle: Text(name),
-        ),
-        ListTile(
-          title: Text('Surname'),
-          subtitle: Text(surname),
-        ),
-        ListTile(
-          title: Text('Date of Birth'),
-          subtitle: Text(dateOfBirth),
-        ),
-        ListTile(
-          title: Text('Email'),
-          subtitle: Text(email),
-        ),
-        ListTile(
-          title: Text('Username'),
-          subtitle: Text(username),
-        ),
-        SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => ChangePasswordPage()),
-          );
-          },
-          child: Text('Change Password'),
-        ),
-        SizedBox(height: 20),
-        Text(
-          'Payment Methods',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 10),
-        ...paymentMethods.asMap().entries.map((entry) {
-          int index = entry.key;
-          String method = entry.value;
-          return ListTile(
-          title: Text(method),
-          trailing: IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () => _removePaymentMethod(index),
-          ),
-          );
-        }),
-        SizedBox(height: 20),
-        Text(
-          'Registered Plates',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 10),
-        ...plates.asMap().entries.map((entry) {
-          int index = entry.key;
-          String plate = entry.value;
-          return ListTile(
-          title: Text(plate),
-          trailing: IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: () => _removePlate(index),
-          ),
-          );
-        }),
-        SizedBox(height: 10),
-        ElevatedButton(
-          onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-            TextEditingController plateController =
-              TextEditingController();
-            return AlertDialog(
-              title: Text('Add Plate'),
-              content: TextField(
-              controller: plateController,
-              decoration: InputDecoration(hintText: 'Enter plate'),
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            Text(
+              'Personal Information',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            ListTile(
+              title: Text('Name'),
+              subtitle: Text(name),
+            ),
+            ListTile(
+              title: Text('Surname'),
+              subtitle: Text(surname),
+            ),
+            ListTile(
+              title: Text('Date of Birth'),
+              subtitle: Text(dateOfBirth),
+            ),
+            ListTile(
+              title: Text('Email'),
+              subtitle: Text(email),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => ChangePasswordPage()),
+                );
+              },
+              child: Text('Change Password'),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Payment Methods',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            if (paymentMethods.isEmpty)
+              Text('No payment methods available'),
+            ...paymentMethods.asMap().entries.map((entry) {
+              int index = entry.key;
+              String method = entry.value['name'] ?? 'Unknown Method';
+              return ListTile(
+                title: Text(method),
+                trailing: IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () => _removePaymentMethod(index),
+                ),
+              );
+            }),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                builder: (context) => RegisterPaymentMethodPage(
+                  apiService: widget.apiService,
+                ),
+                ),
+              );
+              _fetchPaymentMethods(); // Refetch payment methods after returning from the page
+              },
+              child: Text('Register Payment Method'),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Registered Plates',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            if (plates.isEmpty)
+              Text('No registered plates available'),
+            ...plates.asMap().entries.map((entry) {
+              int index = entry.key;
+              String plate = entry.value;
+              return ListTile(
+                title: Text(plate),
+                trailing: IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () => _removePlate(index),
+                ),
+              );
+            }),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    TextEditingController plateController =
+                        TextEditingController();
+                    return AlertDialog(
+                      title: Text('Add Plate'),
+                      content: TextField(
+                        controller: plateController,
+                        decoration: InputDecoration(hintText: 'Enter plate'),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            _addPlate(plateController.text);
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('Add'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Text('Add Plate'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context).pushReplacementNamed('/login');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orangeAccent,
               ),
-              actions: [
-              TextButton(
-                onPressed: () {
-                Navigator.of(context).pop();
-                },
-                child: Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                _addPlate(plateController.text);
-                Navigator.of(context).pop();
-                },
-                child: Text('Add'),
-              ),
-              ],
-            );
-            },
-          );
-          },
-          child: Text('Add Plate'),
+              child: Text('Logout'),
+            ),
+          ],
         ),
-        SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () async {
-          await FirebaseAuth.instance.signOut();
-          Navigator.of(context).pushReplacementNamed('/login');
-          },
-          style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orangeAccent,
-          ),
-          child: Text('Logout'),
-        ),
-        ],
-      ),
       ),
     );
   }
@@ -411,6 +400,126 @@ class ChangePasswordPage extends StatelessWidget {
               child: Text('Change Password'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class RegisterPaymentMethodPage extends StatelessWidget {
+  
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController cardNumberController = TextEditingController();
+  final TextEditingController expiryDateController = TextEditingController();
+  final TextEditingController cvcController = TextEditingController();
+  final ApiService apiService;
+
+  RegisterPaymentMethodPage({
+    super.key,
+    required this.apiService,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Add Payment Method'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 16),
+              TextFormField(
+                controller: cardNumberController,
+                decoration: InputDecoration(
+                  labelText: 'Card Number',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your card number';
+                  }
+                  if (value.length != 16) {
+                    return 'Card number must be 16 digits';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: expiryDateController,
+                decoration: InputDecoration(
+                  labelText: 'Expiry Date (MM/YY)',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.datetime,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the expiry date';
+                  }
+                  if (!RegExp(r'^(0[1-9]|1[0-2])\/\d{2}$').hasMatch(value)) {
+                    return 'Enter a valid expiry date (MM/YY)';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: cvcController,
+                decoration: InputDecoration(
+                  labelText: 'CVC',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the CVC';
+                  }
+                  if (value.length != 3) {
+                    return 'CVC must be 3 digits';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 24),
+                Center(
+                child: ElevatedButton(
+                  child: Text('Add Payment Method'),
+                  onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    try {
+                    final methodId = await apiService.addPaymentMethod(
+                      cardNumberController.text,
+                      expiryDateController.text,
+                      cvcController.text,
+                    );
+                    if (methodId != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Payment method added successfully')),
+                      );
+                      Navigator.of(context).pop();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to add payment method. Please try again.')),
+                      );
+                    }
+                    } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error adding payment method: $e')),
+                    );
+                    }
+                  }
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

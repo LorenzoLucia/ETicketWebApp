@@ -42,7 +42,7 @@ class HomeScreen extends StatelessWidget {
         break;
       case 'CUSTOMER':
       default:
-        homePage = MyHomePage(apiService: apiService);
+        homePage = MyHomePage(apiService: apiService, userData: userData);
         // homePage = CustomerAdminPage(apiService: apiService, userData: userData);
         // homePage = ParkingControllerPage(apiService: apiService,);
         break;
@@ -83,8 +83,9 @@ class MyAppState extends ChangeNotifier {
 
 class MyHomePage extends StatefulWidget {
   final ApiService apiService;
+  final Map<String, dynamic> userData;
 
-  const MyHomePage({super.key, required this.apiService});
+  const MyHomePage({super.key, required this.apiService, required this.userData});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -104,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = PurchasedPage(apiService: widget.apiService);
         break;
       case 2:
-        page = ProfilePage(apiService: widget.apiService);
+        page = ProfilePage(apiService: widget.apiService, userData: widget.userData);
         break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');

@@ -1,7 +1,7 @@
 import 'package:eticket_web_app/auth_gate.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
-import 'package:eticket_web_app/home.dart';
+// import 'package:eticket_web_app/home.dart';
 import 'package:intl/intl.dart';
 
 class RegistrationPage extends StatefulWidget {
@@ -40,7 +40,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       final data = {
         'name': _nameController.text,
         'surname': _surnameController.text,
-        'birthdate': _selectedBirthdate?.toIso8601String(),
+        'birthdate': _selectedBirthdate != null ? DateFormat('yyyy-MM-dd').format(_selectedBirthdate!) : null,
       };
 
       try {

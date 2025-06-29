@@ -151,6 +151,22 @@ class ApiService {
     }
   }
 
+  Future<void> removePaymentMethod(String methodId) async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/users/$user_id/payment-methods/$methodId');
+    try {
+      final response = await http.delete(
+        url,
+        headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
+      );
+      if (response.statusCode != 200) {
+        throw Exception('Failed to remove payment method');
+      }
+    } catch (e) {
+      throw Exception('Error removing payment method: $e');
+    }
+  }
+
   Future<List<String>> fetchPlates() async {
     try {
       final tokenId = await getTokenId();
@@ -182,6 +198,22 @@ class ApiService {
       return;
     } catch (e) {
       throw Exception('Error adding plate: $e');
+    }
+  }
+
+  Future<void> removePlate(String plate) async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/users/$user_id/plates/$plate');
+    try {
+      final response = await http.delete(
+        url,
+        headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
+      );
+      if (response.statusCode != 200) {
+        throw Exception('Failed to remove plate');
+      }
+    } catch (e) {
+      throw Exception('Error removing plate: $e');
     }
   }
 
@@ -318,7 +350,7 @@ class ApiService {
     }
   }
 
-  Future<bool> sendRegistrationData(Map<String, String?> data) async {
+  Future<bool> sendRegistrationData(Map<String, dynamic> data) async {
     final url = Uri.parse('$baseUrl/register');
     final body = jsonEncode(data);
 
