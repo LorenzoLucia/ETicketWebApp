@@ -63,9 +63,10 @@ class ApiService {
     try {
       final tokenId = await getTokenId();
       final response = await http.get(
-        Uri.parse('$baseUrl/$user_id/tickets'),
+        Uri.parse('$baseUrl/users/$user_id/tickets'),
         headers: {'auth': (tokenId ?? '')});
       if (response.statusCode == 200) {
+        print(json.decode(response.body));
         return List<Map<String, dynamic>>.from(json.decode(response.body));
       } else {
         throw Exception('Failed to load tickets');
@@ -93,38 +94,54 @@ class ApiService {
   //   }
   // }
 
-  Future<List<String>> fetchPaymentMethods() async {
-    try {
-      final tokenId = await getTokenId();
-      final response = await http.get(
-        Uri.parse('$baseUrl/users/$user_id/payment-methods'),
-        headers: {'auth': (tokenId ?? '')});
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return List<String>.from(data);
-      } else {
-        throw Exception('Failed to load payment methods');
+  Future<List<Map<String, String>>> fetchPaymentMethods() async {
+  try {
+    final tokenId = await getTokenId();
+    final response = await http.get(
+      Uri.parse('$baseUrl/users/$user_id/payment-methods'),
+      headers: {'auth': (tokenId ?? '')}
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      List<Map<String, String>> paymentMethods = [];
+
+      for (var entry in data) {
+        // Assumiamo che ogni entry sia Map<String, dynamic>
+        final map = Map<String, String>.from(
+          (entry as Map).map((key, value) => MapEntry(
+            key.toString(),
+            value?.toString() ?? ''
+          )),
+        );
+        paymentMethods.add(map);
       }
-    } catch (e) {
-      // Handle errors appropriately
-      throw Exception('Error fetching tickets: $e');
+
+      return paymentMethods;
+    } else {
+      throw Exception('Failed to load payment methods');
     }
+  } catch (e) {
+    throw Exception('Error fetching payment methods: $e');
   }
+}
+
 
   Future<String> addPaymentMethod(String cardNumber, String expiry, String cvc) async {
     final tokenId = await getTokenId();
-    final url = Uri.parse('$baseUrl/$user_id/payment-methods');
+    final url = Uri.parse('$baseUrl/users/$user_id/payment-methods');
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
         body: jsonEncode({
-          'cardNumber': cardNumber,
-          'expiryDate': expiry,
+          'card_number': cardNumber,
+          'expiry': expiry,
           'cvc': cvc,
         }),
       );
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         return response.body; // Assuming the response contains the ID of the added payment method
       } else {
         throw Exception('Failed to add payment method');
@@ -369,8 +386,18 @@ class ApiService {
 
   Future<bool> payTicket(String plate, String methodId, String amount, String duration, String zone, String? id) async {
     final tokenId = await getTokenId();
-    final url = Uri.parse('$baseUrl/$user_id/pay');
+    final url = Uri.parse('$baseUrl/users/$user_id/pay');
     try {
+      print(
+        jsonEncode({
+          'payment_method_id': methodId,
+          'amount': amount,
+          'duration': duration,
+          'zone': zone,
+          'ticket_id': id!,
+          'plate': plate,
+        })
+      );
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
@@ -384,7 +411,7 @@ class ApiService {
         }),
       );
 
-      return response.statusCode == 201;
+      return response.statusCode == 200;
     } catch (e) {
       throw Exception('Error paying ticket: $e');
     }

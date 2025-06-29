@@ -34,6 +34,8 @@ class _ExtensionPageState extends State<ExtensionPage> {
     id = widget.id;
     selectedZone = widget.zone;
     expirationDateTime = widget.expirationDateTime;
+    loadPrices();
+    // loadRegisteredPlates(); // Uncomment if you want to load registered plates
   }
 
   // The zonePrices map should be fetched from an HTTP request.
@@ -51,11 +53,12 @@ class _ExtensionPageState extends State<ExtensionPage> {
 
   // Placeholder zone prices
   // This should be replaced with the actual data from the server.
-  Map<String, double> zonePrices = {
-    'Zone A': 2.0,
-    'Zone B': 1.5,
-    'Zone C': 1.0,
-  };
+  // Map<String, double> zonePrices = {
+  //   'Zone A': 2.0,
+  //   'Zone B': 1.5,
+  //   'Zone C': 1.0,
+  // };
+  Map<String, double> zonePrices = {};
 
   Future<void> loadPrices() async {
     try {
@@ -135,6 +138,7 @@ class _ExtensionPageState extends State<ExtensionPage> {
                       zone: selectedZone!,
                       id: id!,
                       apiService: widget.apiService,
+                      plate: widget.plate,
                     ),
                     ),
                   );

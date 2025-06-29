@@ -47,15 +47,32 @@ class _PurchasedPage extends State<PurchasedPage> {
 
 
   // Fetch tickets from the server (to be implemented)
-  Future<List<Map<String, dynamic>>> fetchTickets() async {
+  List<Map<String, dynamic>> tickets = [];
+  late Future<bool> _hasTickets;
+
+  Future<bool> fetchTickets() async {
     try {
       final response  = await widget.apiService.fetchTickets();
       // For now, return the fakeTickets
-      return fakeTickets;
+      if (response.isEmpty) {
+        return false;
+      }
+      setState(() {
+        tickets = response;
+      });
+      
+      return true;
     } catch (e) {
       // Handle errors appropriately
       throw Exception('Error fetching tickets: $e');
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch tickets when the page is initialized
+    _hasTickets = fetchTickets();
   }
 
   @override
@@ -64,40 +81,40 @@ class _PurchasedPage extends State<PurchasedPage> {
       appBar: AppBar(
         title: Text('Purchased Tickets'),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: fetchTickets(),
+      body: FutureBuilder<bool>(
+        future: _hasTickets,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error fetching tickets'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } else if (!snapshot.data!) {
             return Center(child: Text('No tickets purchased yet'));
           } else {
-            final tickets = snapshot.data!;
+            // final tickets = snapshot.data!;
             return ListView.builder(
               itemCount: tickets.length,
               itemBuilder: (context, index) {
                 final ticket = tickets[index];
-                final isActive = ticket['status'] == 'active';
+                final isActive = ticket['is_active'];
                 return Card(
                   color: isActive ? Colors.green[100] : Colors.red[100],
                   margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   child: ListTile(
-                  title: Text('Plate: ${ticket['plate']}'),
+                  title: Text('Plate: ${ticket['plate']['number']}'),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                    Text('Zone: ${ticket['zone']}'),
+                    Text('Zone: ${ticket['zone']['name']}'),
                     Text('Price: \$${ticket['price']}'),
                     Text(
-                      'Start: ${ticket['startDateTime'].toLocal()}',
+                      'Start: ${ticket['start_time']}',
                       style: TextStyle(
                       color: Colors.black,
                       ),
                     ),
                     Text(
-                      'Expires: ${ticket['expirationDateTime'].toLocal()}',
+                      'Expires: ${ticket['end_time']}',
                       style: TextStyle(
                       color: Colors.black,
                       ),
@@ -122,9 +139,9 @@ class _PurchasedPage extends State<PurchasedPage> {
                         MaterialPageRoute(
                           builder: (context) => ExtensionPage(
                           id: ticket['id'],
-                          expirationDateTime: ticket['expirationDateTime'],
-                          zone: ticket['zone'],
-                          plate: ticket['plate'],
+                          expirationDateTime: DateTime.parse(ticket['end_time']),
+                          zone: ticket['zone']['name'],
+                          plate: ticket['plate']['number'],
                           apiService: widget.apiService,
                           ),
                         ),

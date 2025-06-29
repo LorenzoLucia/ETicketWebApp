@@ -52,6 +52,14 @@ class _PayScreenState extends State<PayScreen> {
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
   List<Map<String, String>> paymentMethods = [];
+  late Future<bool> _hasRegisteredPaymentMethodsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the future to check for registered payment methods
+    _hasRegisteredPaymentMethodsFuture = hasRegisteredPaymentMethods();
+  }
 
   // Fake registered payment methods for debug purposes
   // List<Map<String, String>> paymentMethods = [
@@ -65,11 +73,13 @@ class _PayScreenState extends State<PayScreen> {
     // return true; // For debug purposes, always return true
     try {
       final methods = await widget.apiService.fetchPaymentMethods();
+      
       if (methods.isNotEmpty) {
         // Fetch the registered payment methods from the server
         setState(() {
-          paymentMethods = List<Map<String, String>>.from(methods);
+          paymentMethods = methods;
         });
+        print('Payment methods loaded: $paymentMethods');
         return true;
       }
       return false;
@@ -84,7 +94,7 @@ class _PayScreenState extends State<PayScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
-      future: hasRegisteredPaymentMethods(),
+      future: _hasRegisteredPaymentMethodsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -316,13 +326,24 @@ class PayNowPage extends StatelessWidget {
                       amount.toString(),
                       duration.toString(),
                       zone,
-                      id,
+                      id ?? '',
                     );
                     if (success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Payment successful!')),
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Payment Successful'),
+                          content: Text('Your payment has been processed successfully!'),
+                          actions: [
+                            TextButton(
+                                onPressed: () {
+                                Navigator.of(context).popUntil((route) => route.isFirst); // Navigate back to the home page
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        ),
                       );
-                      Navigator.of(context).popUntil((route) => route.isFirst); // Navigate back to the home page
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Payment failed. Please try again.')),
