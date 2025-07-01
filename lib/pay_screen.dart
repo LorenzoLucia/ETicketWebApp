@@ -126,7 +126,7 @@ class _PayScreenState extends State<PayScreen> {
 
 class NewPaymentMethodPage extends StatelessWidget {
   final double amount;
-  final int duration;
+  final double duration;
   final String zone;
   final String? id;
   final String? plate;
@@ -293,7 +293,7 @@ class NewPaymentMethodPage extends StatelessWidget {
 class PayNowPage extends StatelessWidget {
   final String methodId;
   final double amount;
-  final int duration;
+  final double duration;
   final String zone;
   final String? id;
   final String? plate;
@@ -385,7 +385,7 @@ class PaymentMethodsPage extends StatelessWidget {
   final Function(Map<String, String>) onPaymentMethodSelected;
 
   final double amount;
-  final int duration;
+  final double duration;
   final String zone;
   final String? id;
   final String? plate;
