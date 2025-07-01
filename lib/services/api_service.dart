@@ -337,9 +337,9 @@ class ApiService {
     }
   }
 
-  Future<bool> addZone(String ZoneId, String name, double? price) async {
-    final url = Uri.parse('$baseUrl/zones/$ZoneId');
-    final body = jsonEncode({'zoneName': name, 'price': price});
+  Future<bool> addZone(String name, double price) async {
+    final url = Uri.parse('$baseUrl/zones');
+    final body = jsonEncode({'name': name, 'price': price});
 
     try {
       final response = await http.post(
@@ -369,7 +369,7 @@ class ApiService {
           'auth': (await getTokenId() ?? ''),
         },
       );
-      return response.statusCode == 201;
+      return response.statusCode == 200;
     } catch (e) {
       throw ('Error removing zone: $e');
     }

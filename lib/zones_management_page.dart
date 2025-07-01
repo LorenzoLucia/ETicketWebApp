@@ -64,18 +64,12 @@ class _ZonesManagementPageState extends State<ZonesManagementPage> {
             TextButton(
               onPressed: () async {
                 try {
-                  await widget.apiService.modifyZone(
-                    zone['id'],
+                  await widget.apiService.addZone(
+                    // zone['id'],
                     nameController.text,
                     double.parse(priceController.text),
                   );
-                  setState(() {
-                    zones[zones.indexWhere((z) => z['id'] == zone['id'])] = {
-                      'id': zone['id'],
-                      'name': nameController.text,
-                      'price': double.parse(priceController.text),
-                    };
-                  });
+                  _fetchZones(); // Refresh the list
                   Navigator.of(context).pop();
                 } catch (e) {
                   // Handle error
@@ -109,9 +103,7 @@ class _ZonesManagementPageState extends State<ZonesManagementPage> {
               onPressed: () async {
                 try {
                   await widget.apiService.removeZone(zone['id']);
-                  setState(() {
-                    zones.removeWhere((z) => z['id'] == zone['id']);
-                  });
+                  _fetchZones(); // Refresh the list
                   Navigator.of(context).pop();
                 } catch (e) {
                   // Handle error
@@ -131,6 +123,16 @@ class _ZonesManagementPageState extends State<ZonesManagementPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Zones Management'),
+        actions: [
+          ElevatedButton.icon(
+        icon: Icon(Icons.add),
+        label: Text('Add Zone'),
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+        ),
+        onPressed: _addZone,
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: zones.length,
@@ -155,6 +157,58 @@ class _ZonesManagementPageState extends State<ZonesManagementPage> {
           );
         },
       ),
+    );
+  }
+
+  void _addZone() {
+    TextEditingController nameController = TextEditingController();
+    TextEditingController priceController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add Zone'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'Zone Name'),
+              ),
+              TextField(
+                controller: priceController,
+                decoration: InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  final newZone = await widget.apiService.addZone(
+                    nameController.text,
+                    double.parse(priceController.text),
+                  );
+                  _fetchZones(); // Refresh the list
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  // Handle error
+                  print('Error adding zone: $e');
+                }
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
