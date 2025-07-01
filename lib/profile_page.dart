@@ -5,14 +5,18 @@ import 'package:eticket_web_app/services/api_service.dart';
 class ProfilePage extends StatefulWidget {
   final ApiService apiService;
   final Map<String, dynamic> userData;
-  const ProfilePage({super.key, required this.apiService, required this.userData});
+  const ProfilePage({
+    super.key,
+    required this.apiService,
+    required this.userData,
+  });
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  List<Map<String,String>> paymentMethods = [];
+  List<Map<String, String>> paymentMethods = [];
   List<String> plates = [];
   String name = '';
   String surname = '';
@@ -50,7 +54,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _fetchPlates() async {
     try {
-      final response = await widget.apiService.fetchPlates(); 
+      final response = await widget.apiService.fetchPlates();
       setState(() {
         plates = List<String>.from(response);
       });
@@ -60,36 +64,41 @@ class _ProfilePageState extends State<ProfilePage> {
       //   plates = ['AB123CD', 'EF456GH'];
       // });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch plates')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to fetch plates')));
     }
   }
 
   void _removePaymentMethod(int index) async {
     bool? confirm = await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Confirm Removal'),
-        content: Text('Are you sure you want to remove this payment method?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('No'),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Confirm Removal'),
+            content: Text(
+              'Are you sure you want to remove this payment method?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text('Remove'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Remove'),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true) {
       // Simulate sending an HTTP request to remove the payment method
       try {
         // Example: await http.delete(Uri.parse('https://api.example.com/payment-methods/$index'));
-        await widget.apiService.removePaymentMethod(paymentMethods[index]['id']??''); // Simulate network delay
+        await widget.apiService.removePaymentMethod(
+          paymentMethods[index]['id'] ?? '',
+        ); // Simulate network delay
         _fetchPaymentMethods();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Payment method removed successfully')),
@@ -105,44 +114,47 @@ class _ProfilePageState extends State<ProfilePage> {
   void _removePlate(int index) async {
     bool? confirm = await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Confirm Removal'),
-        content: Text('Are you sure you want to remove this plate?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('No'),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Confirm Removal'),
+            content: Text('Are you sure you want to remove this plate?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text('Remove'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Remove'),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true) {
       // Simulate sending an HTTP request to remove the plate
       try {
         // Example: await http.delete(Uri.parse('https://api.example.com/plates/$index'));
-        await widget.apiService.removePlate(plates[index]); // Simulate network delay
+        await widget.apiService.removePlate(
+          plates[index],
+        ); // Simulate network delay
         _fetchPlates();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Plate removed successfully')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Plate removed successfully')));
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to remove plate')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to remove plate')));
       }
     }
   }
 
   void _addPlate(String plate) async {
     if (plate.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Plate cannot be empty')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Plate cannot be empty')));
       return;
     }
 
@@ -151,22 +163,20 @@ class _ProfilePageState extends State<ProfilePage> {
       // Example: await http.post(Uri.parse('https://api.example.com/plates'), body: {'plate': plate});
       await widget.apiService.addPlate(plate); // Simulate network delay
       _fetchPlates();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Plate added successfully')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Plate added successfully')));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add plate')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to add plate')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile Page'),
-      ),
+      appBar: AppBar(title: Text('Profile Page')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -176,22 +186,10 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            ListTile(
-              title: Text('Name'),
-              subtitle: Text(name),
-            ),
-            ListTile(
-              title: Text('Surname'),
-              subtitle: Text(surname),
-            ),
-            ListTile(
-              title: Text('Date of Birth'),
-              subtitle: Text(dateOfBirth),
-            ),
-            ListTile(
-              title: Text('Email'),
-              subtitle: Text(email),
-            ),
+            ListTile(title: Text('Name'), subtitle: Text(name)),
+            ListTile(title: Text('Surname'), subtitle: Text(surname)),
+            ListTile(title: Text('Date of Birth'), subtitle: Text(dateOfBirth)),
+            ListTile(title: Text('Email'), subtitle: Text(email)),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -207,13 +205,13 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            if (paymentMethods.isEmpty)
-              Text('No payment methods available'),
+            if (paymentMethods.isEmpty) Text('No payment methods available'),
             ...paymentMethods.asMap().entries.map((entry) {
               int index = entry.key;
+              String methodOwner = entry.value["owner_name"] ?? "Unknown Owner";
               String method = entry.value['name'] ?? 'Unknown Method';
               return ListTile(
-                title: Text(method),
+                title: Text('$methodOwner - $method'),
                 trailing: IconButton(
                   icon: Icon(Icons.delete),
                   onPressed: () => _removePaymentMethod(index),
@@ -223,14 +221,15 @@ class _ProfilePageState extends State<ProfilePage> {
             SizedBox(height: 10),
             ElevatedButton(
               onPressed: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                builder: (context) => RegisterPaymentMethodPage(
-                  apiService: widget.apiService,
-                ),
-                ),
-              );
-              _fetchPaymentMethods(); // Refetch payment methods after returning from the page
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder:
+                        (context) => RegisterPaymentMethodPage(
+                          apiService: widget.apiService,
+                        ),
+                  ),
+                );
+                _fetchPaymentMethods(); // Refetch payment methods after returning from the page
               },
               child: Text('Register Payment Method'),
             ),
@@ -240,8 +239,7 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            if (plates.isEmpty)
-              Text('No registered plates available'),
+            if (plates.isEmpty) Text('No registered plates available'),
             ...plates.asMap().entries.map((entry) {
               int index = entry.key;
               String plate = entry.value;
@@ -316,9 +314,7 @@ class ChangePasswordPage extends StatelessWidget {
     TextEditingController confirmPasswordController = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Change Password'),
-      ),
+      appBar: AppBar(title: Text('Change Password')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -327,25 +323,19 @@ class ChangePasswordPage extends StatelessWidget {
             TextField(
               controller: oldPasswordController,
               obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Old Password',
-              ),
+              decoration: InputDecoration(labelText: 'Old Password'),
             ),
             SizedBox(height: 10),
             TextField(
               controller: newPasswordController,
               obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'New Password',
-              ),
+              decoration: InputDecoration(labelText: 'New Password'),
             ),
             SizedBox(height: 10),
             TextField(
               controller: confirmPasswordController,
               obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Confirm New Password',
-              ),
+              decoration: InputDecoration(labelText: 'Confirm New Password'),
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -388,9 +378,9 @@ class ChangePasswordPage extends StatelessWidget {
                   } else if (e.code == 'weak-password') {
                     errorMessage = 'The new password is too weak';
                   }
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(errorMessage)),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(errorMessage)));
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('An unexpected error occurred')),
@@ -407,24 +397,19 @@ class ChangePasswordPage extends StatelessWidget {
 }
 
 class RegisterPaymentMethodPage extends StatelessWidget {
-  
   final _formKey = GlobalKey<FormState>();
   final TextEditingController cardNumberController = TextEditingController();
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
+  final TextEditingController cardOwnerController = TextEditingController();
   final ApiService apiService;
 
-  RegisterPaymentMethodPage({
-    super.key,
-    required this.apiService,
-  });
+  RegisterPaymentMethodPage({super.key, required this.apiService});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Payment Method'),
-      ),
+      appBar: AppBar(title: Text('Add Payment Method')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -432,6 +417,21 @@ class RegisterPaymentMethodPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height: 16),
+              TextFormField(
+                controller: cardOwnerController,
+                decoration: InputDecoration(
+                  labelText: 'Card owner',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.text,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter card owner name and surname';
+                  }
+                  return null;
+                },
+              ),
               SizedBox(height: 16),
               TextFormField(
                 controller: cardNumberController,
@@ -488,33 +488,44 @@ class RegisterPaymentMethodPage extends StatelessWidget {
                 },
               ),
               SizedBox(height: 24),
-                Center(
+              Center(
                 child: ElevatedButton(
                   child: Text('Add Payment Method'),
                   onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    try {
-                    final methodId = await apiService.addPaymentMethod(
-                      cardNumberController.text,
-                      expiryDateController.text,
-                      cvcController.text,
-                    );
-                    if (methodId != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Payment method added successfully')),
-                      );
-                      Navigator.of(context).pop();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to add payment method. Please try again.')),
-                      );
+                    if (_formKey.currentState!.validate()) {
+                      try {
+                        final methodId = await apiService.addPaymentMethod(
+                          cardNumberController.text,
+                          expiryDateController.text,
+                          cvcController.text,
+                          cardOwnerController.text,
+                        );
+                        if (methodId != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Payment method added successfully',
+                              ),
+                            ),
+                          );
+                          Navigator.of(context).pop();
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Failed to add payment method. Please try again.',
+                              ),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error adding payment method: $e'),
+                          ),
+                        );
+                      }
                     }
-                    } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error adding payment method: $e')),
-                    );
-                    }
-                  }
                   },
                 ),
               ),
@@ -536,9 +547,7 @@ class AddPlatePage extends StatelessWidget {
     TextEditingController plateController = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Plate'),
-      ),
+      appBar: AppBar(title: Text('Add Plate')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -546,9 +555,7 @@ class AddPlatePage extends StatelessWidget {
           children: [
             TextField(
               controller: plateController,
-              decoration: InputDecoration(
-                labelText: 'Enter Plate',
-              ),
+              decoration: InputDecoration(labelText: 'Enter Plate'),
             ),
             SizedBox(height: 20),
             ElevatedButton(

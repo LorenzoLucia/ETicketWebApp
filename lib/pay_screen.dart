@@ -20,7 +20,7 @@ import 'package:eticket_web_app/services/api_service.dart';
 //   }
 // }
 
-class PayScreen extends StatefulWidget{
+class PayScreen extends StatefulWidget {
   final double amount;
   final int duration;
   final String zone;
@@ -35,18 +35,14 @@ class PayScreen extends StatefulWidget{
     required this.zone,
     this.id,
     this.plate,
-    required this.apiService
+    required this.apiService,
   });
 
   @override
   _PayScreenState createState() => _PayScreenState();
-
 }
 
-
-
 class _PayScreenState extends State<PayScreen> {
-
   // final _formKey = GlobalKey<FormState>();
   final TextEditingController cardNumberController = TextEditingController();
   final TextEditingController expiryDateController = TextEditingController();
@@ -68,12 +64,11 @@ class _PayScreenState extends State<PayScreen> {
   //   {'name': 'Amex **** 9012', 'id': '3'},
   // ];
 
-
   Future<bool> hasRegisteredPaymentMethods() async {
     // return true; // For debug purposes, always return true
     try {
       final methods = await widget.apiService.fetchPaymentMethods();
-      
+
       if (methods.isNotEmpty) {
         // Fetch the registered payment methods from the server
         setState(() {
@@ -98,21 +93,13 @@ class _PayScreenState extends State<PayScreen> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text('Payment'),
-            ),
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            appBar: AppBar(title: Text('Payment')),
+            body: Center(child: CircularProgressIndicator()),
           );
         } else if (snapshot.hasError) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text('Payment'),
-            ),
-            body: Center(
-              child: Text('Error loading payment methods'),
-            ),
+            appBar: AppBar(title: Text('Payment')),
+            body: Center(child: Text('Error loading payment methods')),
           );
         } else {
           // Always show the payment methods page, allowing the user to add a new method if needed
@@ -147,6 +134,7 @@ class NewPaymentMethodPage extends StatelessWidget {
   final TextEditingController cardNumberController = TextEditingController();
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
+  final TextEditingController cardOwnerController = TextEditingController();
   final ApiService apiService;
 
   NewPaymentMethodPage({
@@ -162,9 +150,7 @@ class NewPaymentMethodPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Add Payment Method'),
-      ),
+      appBar: AppBar(title: Text('Add Payment Method')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -175,6 +161,21 @@ class NewPaymentMethodPage extends StatelessWidget {
               Text(
                 'Amount to Pay: \$${amount.toStringAsFixed(2)}',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: cardOwnerController,
+                decoration: InputDecoration(
+                  labelText: 'Card Owner',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter card owner name and surname';
+                  }
+                  return null;
+                },
               ),
               SizedBox(height: 16),
               TextFormField(
@@ -242,29 +243,39 @@ class NewPaymentMethodPage extends StatelessWidget {
                           cardNumberController.text,
                           expiryDateController.text,
                           cvcController.text,
+                          cardOwnerController.text,
                         );
                         if (methodId != null) {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => PayNowPage(
-                                methodId: methodId,
-                                amount: amount,
-                                duration: duration,
-                                zone: zone,
-                                id: id,
-                                plate: plate,
-                                apiService: apiService,
-                              ),
+                              builder:
+                                  (context) => PayNowPage(
+                                    methodId: methodId,
+                                    amount: amount,
+                                    duration: duration,
+                                    zone: zone,
+                                    id: id,
+                                    plate: plate,
+                                    apiService: apiService,
+                                  ),
                             ),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Failed to register payment method. Please try again.')),
+                            SnackBar(
+                              content: Text(
+                                'Failed to register payment method. Please try again.',
+                              ),
+                            ),
                           );
                         }
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error registering payment method: $e')),
+                          SnackBar(
+                            content: Text(
+                              'Error registering payment method: $e',
+                            ),
+                          ),
                         );
                       }
                     }
@@ -302,9 +313,7 @@ class PayNowPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Confirm Payment'),
-      ),
+      appBar: AppBar(title: Text('Confirm Payment')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -331,22 +340,29 @@ class PayNowPage extends StatelessWidget {
                     if (success) {
                       showDialog(
                         context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text('Payment Successful'),
-                          content: Text('Your payment has been processed successfully!'),
-                          actions: [
-                            TextButton(
-                                onPressed: () {
-                                Navigator.of(context).popUntil((route) => route.isFirst); // Navigate back to the home page
-                              },
-                              child: Text('OK'),
+                        builder:
+                            (context) => AlertDialog(
+                              title: Text('Payment Successful'),
+                              content: Text(
+                                'Your payment has been processed successfully!',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).popUntil(
+                                      (route) => route.isFirst,
+                                    ); // Navigate back to the home page
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Payment failed. Please try again.')),
+                        SnackBar(
+                          content: Text('Payment failed. Please try again.'),
+                        ),
                       );
                     }
                   } catch (e) {
@@ -375,7 +391,8 @@ class PaymentMethodsPage extends StatelessWidget {
   final String? plate;
   final ApiService apiService;
 
-  const PaymentMethodsPage({super.key, 
+  const PaymentMethodsPage({
+    super.key,
     required this.paymentMethods,
     required this.onPaymentMethodSelected,
     required this.amount,
@@ -383,80 +400,86 @@ class PaymentMethodsPage extends StatelessWidget {
     required this.zone,
     this.id,
     this.plate,
-    required this.apiService
+    required this.apiService,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-      title: Text('Select Payment Method'),
-      ),
+      appBar: AppBar(title: Text('Select Payment Method')),
       body: ListView.builder(
-      itemCount: paymentMethods.length + 1, // Add one for the "Add New Payment Method" option
-      itemBuilder: (context, index) {
-        if (index == paymentMethods.length) {
-        // Add New Payment Method option
-        return ListTile(
-          title: Text('Add New Payment Method'),
-          leading: Icon(Icons.add),
-          onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-            builder: (context) => NewPaymentMethodPage(
-              amount: amount,
-              duration: duration,
-              zone: zone,
-              id: id,
-              plate: plate,
-              apiService: apiService,
-            ),
-            ),
-          );
-          },
-        );
-        } else {
-        final method = paymentMethods[index];
-        return ListTile(
-          title: Text(method['name']!),
-          onTap: () {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-            title: Text('Confirm Payment Method'),
-            content: Text('Are you sure you want to use ${method['name']}?'),
-            actions: [
-              TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-              ),
-              TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
+        itemCount:
+            paymentMethods.length +
+            1, // Add one for the "Add New Payment Method" option
+        itemBuilder: (context, index) {
+          if (index == paymentMethods.length) {
+            // Add New Payment Method option
+            return ListTile(
+              title: Text('Add New Payment Method'),
+              leading: Icon(Icons.add),
+              onTap: () {
                 Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => PayNowPage(
-                  methodId: method['id']!,
-                  amount: amount,
-                  duration: duration,
-                  zone: zone,
-                  id: id,
-                  plate: plate,
-                  apiService: apiService,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => NewPaymentMethodPage(
+                          amount: amount,
+                          duration: duration,
+                          zone: zone,
+                          id: id,
+                          plate: plate,
+                          apiService: apiService,
+                        ),
                   ),
-                ),
                 );
               },
-              child: Text('Yes'),
-              ),
-            ],
-            
-            ),
-          );
-          },
-        );
-        }
-      },
+            );
+          } else {
+            final method = paymentMethods[index];
+            String methodName = method['name']!;
+            String methodOwner = method["owner_name"]!;
+            return ListTile(
+              title: Text('$methodOwner - $methodName'),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder:
+                      (context) => AlertDialog(
+                        title: Text('Confirm Payment Method'),
+                        content: Text(
+                          'Are you sure you want to use ${method['name']}?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => PayNowPage(
+                                        methodId: method['id']!,
+                                        amount: amount,
+                                        duration: duration,
+                                        zone: zone,
+                                        id: id,
+                                        plate: plate,
+                                        apiService: apiService,
+                                      ),
+                                ),
+                              );
+                            },
+                            child: Text('Yes'),
+                          ),
+                        ],
+                      ),
+                );
+              },
+            );
+          }
+        },
       ),
     );
   }
