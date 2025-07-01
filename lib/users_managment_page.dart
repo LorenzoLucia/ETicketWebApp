@@ -17,7 +17,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
     if (selectedFilterRole == 'All') {
       return users;
     }
-    return users.where((user) => user['role'] == selectedFilterRole).toList();
+    return users.where((user) => _getRoleLabel(user['role']) == selectedFilterRole).toList();
   }
 
   @override
@@ -29,6 +29,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
   Future<void> _fetchUsers() async {
     try {
       final fetchedUsers = await widget.apiService.getUsers();
+      print('Fetched users: $fetchedUsers');
       setState(() {
         users = fetchedUsers;
       });
@@ -38,11 +39,42 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
     }
   }
 
+  String _getRoleLabel(String role) {
+    switch (role) {
+      case 'CUSTOMER':
+        return 'User';
+      case 'CONTROLLER':
+        return 'Controller';
+      case 'CUSTOMER_ADMINISTRATOR':
+        return 'Customer Administrator';
+      case 'SYSTEM_ADMINISTRATOR':
+        return 'System Administrator';
+      
+      default:
+        return 'Unknown Role';
+    }
+  }
+
+  String _getRoleValue(String role) {
+    switch (role) {
+      case 'User':
+        return 'CUSTOMER';
+      case 'Controller':
+        return 'CONTROLLER';
+      case 'Customer Administrator':
+        return 'CUSTOMER_ADMINISTRATOR';
+      case 'System Administrator':
+        return 'SYSTEM_ADMINISTRATOR';
+      default:
+        return 'Unknown Role';
+    }
+  }
+
   void _modifyUser(int index) {
     final user = filteredUsers[index];
-    TextEditingController usernameController = TextEditingController(text: user['username']);
+    // TextEditingController usernameController = TextEditingController(text: user['name'] + ' ' + user['surname']);
     TextEditingController emailController = TextEditingController(text: user['email']);
-    String selectedRole = user['role'];
+    String selectedRole = _getRoleLabel(user['role']);
 
     showDialog(
       context: context,
@@ -52,17 +84,17 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
-              ),
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-              ),
+              // TextField(
+              //   controller: usernameController,
+              //   decoration: InputDecoration(labelText: 'Username'),
+              // ),
+                Text(
+                'Email: ${emailController.text}',
+                style: TextStyle(fontSize: 16),
+                ),
               DropdownButtonFormField<String>(
                 value: selectedRole,
-                items: ['Admin', 'User', 'Moderator', 'CNT', 'CA', 'SA']
+                items: ['User', 'Controller', 'Customer Administrator', 'System Administrator']
                     .map((role) => DropdownMenuItem(value: role, child: Text(role)))
                     .toList(),
                 onChanged: (value) {
@@ -84,19 +116,12 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
             TextButton(
               onPressed: () async {
                 try {
-                  await widget.apiService.modifyUser(user['id'], 
-                    usernameController.text,
+                  await widget.apiService.modifyUser(
+                    user['id'], 
                     emailController.text,
-                    selectedRole,
+                    _getRoleValue(selectedRole),
                   );
-                  setState(() {
-                    users[users.indexWhere((u) => u['id'] == user['id'])] = {
-                      'id': user['id'],
-                      'username': usernameController.text,
-                      'email': emailController.text,
-                      'role': selectedRole,
-                    };
-                  });
+                  _fetchUsers();
                   Navigator.of(context).pop();
                 } catch (e) {
                   // Handle error
@@ -118,7 +143,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
       builder: (context) {
         return AlertDialog(
           title: Text('Delete User'),
-          content: Text('Are you sure you want to delete ${user['username']}?'),
+          content: Text('Are you sure you want to delete ${user['email']}?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -130,9 +155,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
               onPressed: () async {
                 try {
                   await widget.apiService.removeUser(user['id']);
-                  setState(() {
-                    users.removeWhere((u) => u['id'] == user['id']);
-                  });
+                  _fetchUsers();
                   Navigator.of(context).pop();
                 } catch (e) {
                   // Handle error
@@ -159,13 +182,14 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
             padding: const EdgeInsets.all(8.0),
             child: DropdownButtonFormField<String>(
               value: selectedFilterRole,
-              items: ['All', 'Admin', 'User', 'Moderator', 'CNT', 'CA', 'SA']
+              items: ['All', 'User', 'Controller', 'Customer Administrator', 'System Administrator']
                   .map((role) => DropdownMenuItem(value: role, child: Text(role)))
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
                     selectedFilterRole = value;
+                    filteredUsers; // Trigger rebuild with new filter
                   });
                 }
               },
@@ -178,8 +202,8 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
               itemBuilder: (context, index) {
                 final user = filteredUsers[index];
                 return ListTile(
-                  title: Text(user['username']),
-                  subtitle: Text('${user['email']} - ${user['role']}'),
+                  title: Text(user['name'] + ' ' + user['surname']),
+                  subtitle: Text('${user['email']} - ${_getRoleLabel(user['role'])}'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

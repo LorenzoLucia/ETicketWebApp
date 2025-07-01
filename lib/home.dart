@@ -1,4 +1,5 @@
 // import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:eticket_web_app/controller_page.dart';
 import 'package:eticket_web_app/profile_page.dart';
 import 'package:eticket_web_app/services/api_service.dart';
 import 'package:eticket_web_app/ticket_page.dart';
@@ -39,6 +40,11 @@ class HomeScreen extends StatelessWidget {
           apiService: apiService,
           userData: userData,
         ); // Replace with your SA page widget
+        break;
+      case 'CONTROLLER':
+        homePage = ParkingControllerPage(
+          apiService: apiService,
+        ); 
         break;
       case 'CUSTOMER':
       default:

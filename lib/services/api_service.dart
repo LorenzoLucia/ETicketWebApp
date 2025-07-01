@@ -246,9 +246,9 @@ class ApiService {
     }
   }
 
-  Future<bool> addUser(String username, String email, String role) async {
+  Future<bool> addUser(String email, String role) async {
     final body = jsonEncode({
-      'username': username,
+      // 'username': username,
       'email': email,
       'role': role,
     });
@@ -263,7 +263,7 @@ class ApiService {
           'auth': (await getTokenId() ?? ''),
         },
       );
-      return response.statusCode == 201;
+      return response.statusCode == 200;
     } catch (e) {
       throw ('Error adding user: $e');
     }
@@ -290,13 +290,11 @@ class ApiService {
 
   Future<bool> modifyUser(
     String uid,
-    String username,
     String new_email,
     String new_role,
   ) async {
     final url = Uri.parse('$baseUrl/users/$uid');
     final body = jsonEncode({
-      'username': username,
       'email': new_email,
       'role': new_role,
     });
@@ -310,7 +308,7 @@ class ApiService {
           'auth': (await getTokenId() ?? ''),
         },
       );
-      return response.statusCode == 201;
+      return response.statusCode == 200;
     } catch (e) {
       throw ('Error modifying user: $e');
     }
