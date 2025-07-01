@@ -170,11 +170,95 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
     );
   }
 
+  void _addUser() {
+    TextEditingController emailController = TextEditingController();
+    TextEditingController nameController = TextEditingController();
+    TextEditingController surnameController = TextEditingController();
+    String selectedRole = 'User';
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add User'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+              ),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'Name'),
+              ),
+              TextField(
+                controller: surnameController,
+                decoration: InputDecoration(labelText: 'Surname'),
+              ),
+              DropdownButtonFormField<String>(
+                value: selectedRole,
+                items: ['User', 'Controller', 'Customer Administrator', 'System Administrator']
+                    .map((role) => DropdownMenuItem(value: role, child: Text(role)))
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    selectedRole = value;
+                  }
+                },
+                decoration: InputDecoration(labelText: 'Role'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await widget.apiService.addUser(
+                    emailController.text,
+                    nameController.text,
+                    surnameController.text,
+                    _getRoleValue(selectedRole),
+                  );
+                  _fetchUsers();
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  // Handle error
+                  print('Error adding user: $e');
+                }
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Users Management'),
+        actions: [
+          ElevatedButton.icon(
+            icon: Icon(Icons.add, size: 24),
+            label: Text(
+              'Add User',
+              style: TextStyle(fontSize: 18),
+            ),
+            onPressed: _addUser,
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [

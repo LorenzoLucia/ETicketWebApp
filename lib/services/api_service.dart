@@ -246,9 +246,11 @@ class ApiService {
     }
   }
 
-  Future<bool> addUser(String email, String role) async {
+  Future<bool> addUser(String email, String name, String surname, String role) async {
     final body = jsonEncode({
       // 'username': username,
+      'name': name,
+      'surname': surname,
       'email': email,
       'role': role,
     });
