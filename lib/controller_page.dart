@@ -17,6 +17,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
   String _ticketStartTime = '';
   String _ticketEndTime = '';
   String _ticketCost = '';
+  String _zone = '';
   List<String> _chalkedCars = [];
 
   void _checkTicketStatus() async {
@@ -28,17 +29,18 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
         _ticketStartTime = '';
         _ticketEndTime = '';
         _ticketCost = '';
+        _zone = '';
       });
       return;
     }
 
     try {
-      // Simulate API call
       final response = await widget.apiService.checkTicketStatus(plate);
+      print(response);
 
       setState(() {
-        if (response['hasTicket']) {
-          DateTime endTime = DateTime.parse(response['endTime']);
+        if (response['has_ticket']) {
+          DateTime endTime = DateTime.parse(response['end_time']);
           DateTime currentTime = DateTime.now();
 
           if (currentTime.isBefore(endTime)) {
@@ -49,15 +51,17 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
             _statusColor = Colors.red;
           }
 
-          _ticketStartTime = response['startTime'];
-          _ticketEndTime = response['endTime'];
-          _ticketCost = response['cost'];
+          _ticketStartTime = response['start_time'];
+          _ticketEndTime = response['end_time'];
+          _ticketCost = response['price'].toString();
+          _zone = response['zone']['name'];
         } else {
           _ticketStatus = 'Ticket not found.';
           _statusColor = Colors.red;
           _ticketStartTime = '';
           _ticketEndTime = '';
           _ticketCost = '';
+          _zone = '';
         }
       });
     } catch (e) {
@@ -67,7 +71,9 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
         _ticketStartTime = '';
         _ticketEndTime = '';
         _ticketCost = '';
+        _zone = '';
       });
+      print('Error checking ticket status: $e');
     }
   }
 
@@ -95,69 +101,112 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
       return;
     }
 
-    if (_ticketStatus == 'Ticket is valid.') {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Cannot Submit Fine'),
-            content: Text('The ticket for plate "$plate" is valid. You cannot submit a fine.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-      return;
-    }
+    // if (_ticketStatus == 'Ticket is valid.') {
+    //   showDialog(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return AlertDialog(
+    //         title: Text('Cannot Submit Fine'),
+    //         content: Text('The ticket for plate "$plate" is valid. You cannot submit a fine.'),
+    //         actions: [
+    //           TextButton(
+    //             onPressed: () {
+    //               Navigator.of(context).pop();
+    //             },
+    //             child: Text('OK'),
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    //   return;
+    // }
 
-    // Show confirmation dialog before submitting the fine
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Submit Fine'),
-          content: Text('Are you sure you want to submit a fine for plate "$plate"?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop(); // Close the dialog
+      TextEditingController reasonController = TextEditingController();
+      TextEditingController amountController = TextEditingController();
 
-                try {
-                  final response = await widget.apiService.submitFine(plate);
+      return AlertDialog(
+        title: Text('Submit Fine'),
+        content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Are you sure you want to submit a fine for plate "$plate"?'),
+          SizedBox(height: 16),
+          TextField(
+          controller: reasonController,
+          decoration: InputDecoration(
+            labelText: 'Reason for Fine',
+            border: OutlineInputBorder(),
+          ),
+          ),
+          SizedBox(height: 16),
+          TextField(
+          controller: amountController,
+          decoration: InputDecoration(
+            labelText: 'Amount to Pay',
+            border: OutlineInputBorder(),
+          ),
+          keyboardType: TextInputType.numberWithOptions(decimal: true),
+          ),
+        ],
+        ),
+        actions: [
+        TextButton(
+          onPressed: () {
+          Navigator.of(context).pop();
+          },
+          child: Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () async {
+          Navigator.of(context).pop();
 
-                  if (response) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Fine successfully submitted for plate "$plate".')),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to submit fine for plate "$plate".')),
-                    );
-                  }
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error submitting fine for plate "$plate".')),
-                  );
-                }
-              },
-              child: Text('Submit'),
-            ),
-          ],
-        );
+          String reason = reasonController.text.trim();
+          String amountText = amountController.text.trim();
+
+          if (reason.isEmpty || amountText.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Please provide both reason and amount for the fine.')),
+            );
+            return;
+          }
+
+          double? amount = double.tryParse(amountText);
+          if (amount == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Please enter a valid amount.')),
+            );
+            return;
+          }
+
+          try {
+            final response = await widget.apiService.submitFine(plate, reason, amount);
+
+            if (response) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Fine successfully submitted for plate "$plate".')),
+            );
+            } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to submit fine for plate "$plate".')),
+            );
+            }
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error submitting fine for plate "$plate".')),
+            );
+          }
+          },
+          child: Text('Submit'),
+        ),
+        ],
+      );
       },
     );
+      
   }
 
   @override
@@ -226,6 +275,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
                           Text('Start Time: $_ticketStartTime'),
                           Text('End Time: $_ticketEndTime'),
                           Text('Cost: $_ticketCost'),
+                          Text('Zone: ${_zone}'),
                         ],
                       ],
                     ),
@@ -252,9 +302,22 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
                       itemBuilder: (context, index) {
                         return ListTile(
                           title: Text(_chalkedCars[index]),
-                          trailing: IconButton(
+                          trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                            icon: Icon(Icons.check_circle),
+                            onPressed: () {
+                              // Add functionality for the new button here
+                            _plateController.text = _chalkedCars[index];
+                            _checkTicketStatus();
+                            },
+                            ),
+                            IconButton(
                             icon: Icon(Icons.delete),
                             onPressed: () => _removeChalkedCar(_chalkedCars[index]),
+                            ),
+                          ],
                           ),
                         );
                       },

@@ -415,7 +415,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> getMe() async {
     final tokenId = await getTokenId();
-    print(tokenId);
+    // print(tokenId);
     final url = Uri.parse('$baseUrl/get-me');
     try {
       final response = await http.get(url, headers: {'auth': (tokenId ?? '')});
@@ -446,20 +446,24 @@ class ApiService {
     }
   }
 
-  Future<bool> submitFine(String plate) async {
+  Future<bool> submitFine(String plate, String reason, double amount) async {
     final tokenId = await getTokenId();
-    final url = Uri.parse('$baseUrl/fines');
+    final url = Uri.parse('$baseUrl/fines/$user_id/$plate/emit-fine');
     final body = jsonEncode({
       'plate': plate,
-      'timestamp': DateTime.now().toIso8601String(),
+      'reason': reason,
+      'amount': amount,
     });
     try {
       final response = await http.post(
         url,
         body: body,
-        headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
+        headers: {
+          'Content-Type': 'application/json',
+          'auth': (tokenId ?? '')
+          },
       );
-      return response.statusCode == 201;
+      return response.statusCode == 200;
     } catch (e) {
       throw Exception('Error submitting fine: $e');
     }
