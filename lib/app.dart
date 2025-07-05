@@ -43,15 +43,23 @@ final router = GoRouter(
           });
            return const Center(child: CircularProgressIndicator());// Wait for user data to be fetched
         }
-        final extra = state.extra! as Map<String, dynamic>;
+        try{
+          final extra = state.extra! as Map<String, dynamic>;
 
         return PayScreen(
-        amount: extra['amount'],
-        duration: extra['duration'],
-        plate: extra['plate'] as String,
-        id: extra['id'] ?? '',
-        zone: extra['zone'],
-      );
+          amount: extra['amount'],
+          duration: extra['duration'],
+          plate: extra['plate'] as String,
+          id: extra['id'] ?? '',
+          zone: extra['zone'],
+        );
+        } catch (e) {
+          print('Error in payment route: $e');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            GoRouter.of(context).go('/home');
+          });
+          return const Center(child: CircularProgressIndicator());
+        }
       },
     ),
     GoRoute(

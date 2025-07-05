@@ -154,47 +154,50 @@ class _TicketPageState extends State<TicketPage> {
                     context: context,
                     builder: (context) {
                       String newPlate = '';
-                      return AlertDialog(
+                        return AlertDialog(
                         title: Text('Enter New Plate'),
                         content: TextField(
                           onChanged: (text) {
-                            newPlate = text;
+                          newPlate = text;
                           },
                           decoration: InputDecoration(hintText: 'Plate number'),
                         ),
                         actions: [
                           TextButton(
-                            onPressed: () {
-                              setState(() {
-                                plate = newPlate;
-                                if (!registeredPlates.contains(newPlate)) {
-                                  registeredPlates.add(newPlate);
-                                }
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('OK'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('Cancel'),
                           ),
                           TextButton(
-                            onPressed: () async {
-                              try {
-                                await widget.apiService.addPlate(newPlate);
-                                setState(() {
-                                  plate = newPlate;
-                                  if (!registeredPlates.contains(newPlate)) {
-                                    registeredPlates.add(newPlate);
-                                  }
-                                });
-                                Navigator.of(context).pop();
-                              } catch (e) {
-                                // Handle error
-                                print('Error saving plate: $e');
+                          onPressed: () async {
+                            if (newPlate.length >= 3) {
+                            try {
+                              await widget.apiService.addPlate(newPlate);
+                              setState(() {
+                              plate = newPlate;
+                              if (!registeredPlates.contains(newPlate)) {
+                                registeredPlates.add(newPlate);
                               }
-                            },
-                            child: Text('Save'),
+                              });
+                              Navigator.of(context).pop();
+                            } catch (e) {
+                              // Handle error
+                              print('Error saving plate: $e');
+                            }
+                            } else {
+                            // Show error message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                              content: Text('Plate must be at least 3 characters long'),
+                              ),
+                            );
+                            }
+                          },
+                          child: Text('Save'),
                           ),
                         ],
-                      );
+                        );
                     },
                   );
                 } else {

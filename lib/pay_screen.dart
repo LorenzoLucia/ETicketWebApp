@@ -416,7 +416,17 @@ class PaymentMethodsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Select Payment Method')),
+      appBar: AppBar(
+        title: Text('Select Payment Method'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+            GoRouter.of(context).go('/home');
+          });
+          },
+        ),
+      ),
       body: ListView.builder(
         itemCount:
             paymentMethods.length +
