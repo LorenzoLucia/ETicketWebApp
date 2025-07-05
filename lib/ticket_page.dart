@@ -15,7 +15,8 @@ class TicketPage extends StatefulWidget {
 
 class _TicketPageState extends State<TicketPage> {
   String? selectedZone;
-  double selectedTime = 1; // Default to 1
+  int selectedTimeHours = 1; // Default to 1 hour
+  int selectedTimeMinutes = 0; // Default to 0 minutes
   double price = 0.0;
   String? plate;
   Map<String, double> zonePrices = {};
@@ -48,6 +49,34 @@ class _TicketPageState extends State<TicketPage> {
     }
   }
 
+  String calculateTicketEndTime() {
+    DateTime now = DateTime.now();
+    DateTime date = now.add(
+      Duration(hours: selectedTimeHours, minutes: selectedTimeMinutes),
+    );
+    Map<int, String> months = {
+      1: "January",
+      2: "February",
+      3: "March",
+      4: "April",
+      5: "May",
+      6: "June",
+      7: "July",
+      8: "August",
+      9: "September",
+      10: "October",
+      11: "November",
+      12: "December",
+    };
+
+    String month = months[date.month]!;
+    int day = date.day;
+    int hour = date.hour;
+    int minutes = date.minute;
+
+    return '$day of $month at $hour:$minutes';
+  }
+
   Future<void> loadPrices() async {
     try {
       final prices = await widget.apiService.fetchZonePrices();
@@ -65,7 +94,9 @@ class _TicketPageState extends State<TicketPage> {
     if (selectedZone != null) {
       setState(() {
         price = double.parse(
-          (zonePrices[selectedZone]! * selectedTime).toStringAsFixed(1),
+          (zonePrices[selectedZone]! *
+                  (selectedTimeHours + selectedTimeMinutes / 60))
+              .toStringAsFixed(1),
         );
       });
     }
@@ -96,9 +127,10 @@ class _TicketPageState extends State<TicketPage> {
               hint: Text('Choose a zone'),
               items:
                   zonePrices.keys.map((zone) {
+                    double zonePrice = zonePrices[zone]!;
                     return DropdownMenuItem<String>(
                       value: zone,
-                      child: Text(zone),
+                      child: Text('$zone  -  $zonePrice €/hr'),
                     );
                   }).toList(),
               onChanged: (value) {
@@ -111,20 +143,35 @@ class _TicketPageState extends State<TicketPage> {
             SizedBox(height: 20),
 
             Text(
-              'Select End Time:',
+              'Select Ticket Duration:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
             SizedBox(height: 20),
 
-            TimePickerTextField(
-              initialTime: Duration(hours: now.hour, minutes: now.minute),
-              onTimeChanged: (double value) {
-                setState(() {
-                  selectedTime = value;
-                });
-                calculatePrice();
-              },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TimePickerTextField(
+                    initialTime: Duration(hours: 1),
+                    onTimeChanged: (Duration value) {
+                      setState(() {
+                        print(value);
+                        selectedTimeHours = value.inHours;
+                        selectedTimeMinutes = value.inMinutes.remainder(60);
+                      });
+                      calculatePrice();
+                    },
+                  ),
+                  SizedBox(width: 25),
+                  Text(
+                    'End Time: ${calculateTicketEndTime()}',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
 
             SizedBox(height: 20),
@@ -154,50 +201,52 @@ class _TicketPageState extends State<TicketPage> {
                     context: context,
                     builder: (context) {
                       String newPlate = '';
-                        return AlertDialog(
+                      return AlertDialog(
                         title: Text('Enter New Plate'),
                         content: TextField(
                           onChanged: (text) {
-                          newPlate = text;
+                            newPlate = text;
                           },
                           decoration: InputDecoration(hintText: 'Plate number'),
                         ),
                         actions: [
                           TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text('Cancel'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Cancel'),
                           ),
                           TextButton(
-                          onPressed: () async {
-                            if (newPlate.length >= 3) {
-                            try {
-                              await widget.apiService.addPlate(newPlate);
-                              setState(() {
-                              plate = newPlate;
-                              if (!registeredPlates.contains(newPlate)) {
-                                registeredPlates.add(newPlate);
+                            onPressed: () async {
+                              if (newPlate.length >= 3) {
+                                try {
+                                  await widget.apiService.addPlate(newPlate);
+                                  setState(() {
+                                    plate = newPlate;
+                                    if (!registeredPlates.contains(newPlate)) {
+                                      registeredPlates.add(newPlate);
+                                    }
+                                  });
+                                  Navigator.of(context).pop();
+                                } catch (e) {
+                                  // Handle error
+                                  print('Error saving plate: $e');
+                                }
+                              } else {
+                                // Show error message
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Plate must be at least 3 characters long',
+                                    ),
+                                  ),
+                                );
                               }
-                              });
-                              Navigator.of(context).pop();
-                            } catch (e) {
-                              // Handle error
-                              print('Error saving plate: $e');
-                            }
-                            } else {
-                            // Show error message
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                              content: Text('Plate must be at least 3 characters long'),
-                              ),
-                            );
-                            }
-                          },
-                          child: Text('Save'),
+                            },
+                            child: Text('Save'),
                           ),
                         ],
-                        );
+                      );
                     },
                   );
                 } else {
@@ -226,14 +275,15 @@ class _TicketPageState extends State<TicketPage> {
                                 '/payment',
                                 extra: {
                                   'amount': price,
-                                  'duration': selectedTime,
+                                  'duration':
+                                      selectedTimeHours +
+                                      selectedTimeMinutes / 60,
                                   'plate': plate,
                                   'zone': selectedZone,
-                                }
+                                },
                               );
                             }
                           });
-                          
                         }
                         : null,
                 child: Text('Proceed to Payment'),
