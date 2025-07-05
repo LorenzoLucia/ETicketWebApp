@@ -1,14 +1,15 @@
 import 'package:eticket_web_app/auth_gate.dart';
+import 'package:eticket_web_app/services/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:go_router/go_router.dart';
 // import 'package:eticket_web_app/home.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class RegistrationPage extends StatefulWidget {
-  final ApiService apiService;
-  final Map<String, dynamic> userData;
 
-  const RegistrationPage({Key? key, required this.apiService, required this.userData}) : super(key: key);
+  const RegistrationPage({Key? key}) : super(key: key);
 
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
@@ -22,10 +23,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController _dateController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
+  
+
   @override
   void initState() {
+    
     super.initState();
-
     _focusNode.addListener(() async {
       if (_focusNode.hasFocus) {
         await _pickDate(context);
@@ -35,7 +38,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     });
   }
 
-  Future<void> _submitForm() async {
+  Future<void> _submitForm(ApiService apiService) async {
     if (_formKey.currentState!.validate()) {
       final data = {
         'name': _nameController.text,
@@ -44,16 +47,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
       };
 
       try {
-        await widget.apiService.sendRegistrationData(data);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            // builder: (context) => HomeScreen(apiService: widget.apiService, userData: widget.userData),
-            builder: (context) => AuthGate(
-              apiService: widget.apiService,
-            ),
-          )
-        );
+        await apiService.sendRegistrationData(data);
+        context.go('/'); // Navigate to the home page or another page after successful registration
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to register: $e')),
@@ -87,6 +82,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final apiService = appState.apiService;
+    final userData = appState.userData;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registration Page'),
@@ -160,7 +159,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _submitForm,
+                onPressed: (){
+                  _submitForm(apiService!);
+                },
                 child: const Text('Register'),
               ),
             ],

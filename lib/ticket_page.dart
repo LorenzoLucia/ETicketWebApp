@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/pay_screen.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:go_router/go_router.dart';
 import 'wheel_time_picker_widget.dart';
 
 class TicketPage extends StatefulWidget {
@@ -216,19 +217,20 @@ class _TicketPageState extends State<TicketPage> {
                 onPressed:
                     selectedZone != null && plate != null
                         ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => PayScreen(
-                                    amount: price,
-                                    duration: selectedTime,
-                                    zone: selectedZone!,
-                                    plate: plate!,
-                                    apiService: widget.apiService,
-                                  ),
-                            ),
-                          );
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (context.mounted) {
+                              context.go(
+                                '/payment',
+                                extra: {
+                                  'amount': price,
+                                  'duration': selectedTime,
+                                  'plate': plate,
+                                  'zone': selectedZone,
+                                }
+                              );
+                            }
+                          });
+                          
                         }
                         : null,
                 child: Text('Proceed to Payment'),

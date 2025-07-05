@@ -1,5 +1,8 @@
+import 'package:eticket_web_app/services/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 // Future<bool> hasRegisteredPaymentMethods() async {
 //   final url = Uri.parse('https://your-server.com/api/payment-methods');
@@ -24,7 +27,6 @@ class PayScreen extends StatefulWidget {
   final String zone;
   final String? id;
   final String? plate;
-  final ApiService apiService;
 
   const PayScreen({
     super.key,
@@ -33,7 +35,6 @@ class PayScreen extends StatefulWidget {
     required this.zone,
     this.id,
     this.plate,
-    required this.apiService,
   });
 
   @override
@@ -46,13 +47,13 @@ class _PayScreenState extends State<PayScreen> {
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
   List<Map<String, String>> paymentMethods = [];
-  late Future<bool> _hasRegisteredPaymentMethodsFuture;
+  late String _hasRegisteredPaymentMethodsFuture = '';
 
   @override
   void initState() {
     super.initState();
     // Initialize the future to check for registered payment methods
-    _hasRegisteredPaymentMethodsFuture = hasRegisteredPaymentMethods();
+    // _hasRegisteredPaymentMethodsFuture = hasRegisteredPaymentMethods();
   }
 
   // Fake registered payment methods for debug purposes
@@ -62,32 +63,35 @@ class _PayScreenState extends State<PayScreen> {
   //   {'name': 'Amex **** 9012', 'id': '3'},
   // ];
 
-  Future<bool> hasRegisteredPaymentMethods() async {
+  Future<List<Map<String,String>>> hasRegisteredPaymentMethods(ApiService apiService) async {
     // return true; // For debug purposes, always return true
     try {
-      final methods = await widget.apiService.fetchPaymentMethods();
+      return await apiService.fetchPaymentMethods();
 
-      if (methods.isNotEmpty) {
-        // Fetch the registered payment methods from the server
-        setState(() {
-          paymentMethods = methods;
-        });
-        print('Payment methods loaded: $paymentMethods');
-        return true;
-      }
-      return false;
+      // if (methods.isNotEmpty) {
+      //   // Fetch the registered payment methods from the server
+      //   setState(() {
+      //     paymentMethods = methods;
+      //   });
+      //   print('Payment methods loaded: $paymentMethods');
+      //   _hasRegisteredPaymentMethodsFuture = 'true';
+      //   return methods;
+      // }
+      
+      // _hasRegisteredPaymentMethodsFuture = 'false';
+      // return false;
     } catch (e) {
       // Handle error
       print('Error loading plates: $e');
+      return [];
     }
 
-    return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _hasRegisteredPaymentMethodsFuture,
+    return FutureBuilder<List<Map<String,String>>>(
+      future: hasRegisteredPaymentMethods(Provider.of<AppState>(context, listen: false).apiService!),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -99,12 +103,10 @@ class _PayScreenState extends State<PayScreen> {
             appBar: AppBar(title: Text('Payment')),
             body: Center(child: Text('Error loading payment methods')),
           );
-        } else {
-          // Always show the payment methods page, allowing the user to add a new method if needed
+        } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           return PaymentMethodsPage(
-            paymentMethods: paymentMethods,
+            paymentMethods: snapshot.data!,
             onPaymentMethodSelected: (selectedMethod) {
-              // Handle the selected payment method
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Selected ${selectedMethod['name']}')),
               );
@@ -114,7 +116,11 @@ class _PayScreenState extends State<PayScreen> {
             zone: widget.zone,
             id: widget.id,
             plate: widget.plate,
-            apiService: widget.apiService,
+          );
+        } else {
+          return Scaffold(
+            appBar: AppBar(title: Text('Payment')),
+            body: Center(child: Text('No registered payment methods found')),
           );
         }
       },
@@ -133,7 +139,7 @@ class NewPaymentMethodPage extends StatelessWidget {
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
   final TextEditingController cardOwnerController = TextEditingController();
-  final ApiService apiService;
+  // final ApiService apiService;
 
   NewPaymentMethodPage({
     super.key,
@@ -142,11 +148,13 @@ class NewPaymentMethodPage extends StatelessWidget {
     required this.zone,
     this.id,
     this.plate,
-    required this.apiService,
+    // required this.apiService,
   });
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final apiService = appState.apiService!;
     return Scaffold(
       appBar: AppBar(title: Text('Add Payment Method')),
       body: Padding(
@@ -254,7 +262,7 @@ class NewPaymentMethodPage extends StatelessWidget {
                                     zone: zone,
                                     id: id,
                                     plate: plate,
-                                    apiService: apiService,
+                                    // apiService: apiService,
                                   ),
                             ),
                           );
@@ -295,7 +303,7 @@ class PayNowPage extends StatelessWidget {
   final String zone;
   final String? id;
   final String? plate;
-  final ApiService apiService;
+  // final ApiService apiService;
 
   PayNowPage({
     super.key,
@@ -305,11 +313,13 @@ class PayNowPage extends StatelessWidget {
     required this.zone,
     this.id,
     this.plate,
-    required this.apiService,
+    // required this.apiService,
   });
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final apiService = appState.apiService!;
     return Scaffold(
       appBar: AppBar(title: Text('Confirm Payment')),
       body: Padding(
@@ -347,9 +357,11 @@ class PayNowPage extends StatelessWidget {
                               actions: [
                                 TextButton(
                                   onPressed: () {
-                                    Navigator.of(context).popUntil(
-                                      (route) => route.isFirst,
-                                    ); // Navigate back to the home page
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      if (context.mounted) {
+                                        context.go('/home');
+                                      }
+                                    });
                                   },
                                   child: Text('OK'),
                                 ),
@@ -387,7 +399,7 @@ class PaymentMethodsPage extends StatelessWidget {
   final String zone;
   final String? id;
   final String? plate;
-  final ApiService apiService;
+  // final ApiService apiService;
 
   const PaymentMethodsPage({
     super.key,
@@ -398,7 +410,7 @@ class PaymentMethodsPage extends StatelessWidget {
     required this.zone,
     this.id,
     this.plate,
-    required this.apiService,
+    // required this.apiService,
   });
 
   @override
@@ -425,7 +437,7 @@ class PaymentMethodsPage extends StatelessWidget {
                           zone: zone,
                           id: id,
                           plate: plate,
-                          apiService: apiService,
+                          // apiService: apiService,
                         ),
                   ),
                 );
@@ -464,7 +476,7 @@ class PaymentMethodsPage extends StatelessWidget {
                                         zone: zone,
                                         id: id,
                                         plate: plate,
-                                        apiService: apiService,
+                                        // apiService: apiService,
                                       ),
                                 ),
                               );

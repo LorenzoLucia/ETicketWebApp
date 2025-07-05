@@ -1,11 +1,12 @@
+import 'package:eticket_web_app/services/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:provider/provider.dart';
 
 
 class ParkingControllerPage extends StatefulWidget {
-  final ApiService apiService;
 
-  ParkingControllerPage({super.key, required this.apiService});
+  ParkingControllerPage({super.key});
   @override
   _ParkingControllerPageState createState() => _ParkingControllerPageState();
 }
@@ -20,7 +21,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
   String _zone = '';
   List<String> _chalkedCars = [];
 
-  void _checkTicketStatus() async {
+  void _checkTicketStatus(ApiService apiService) async {
     String plate = _plateController.text.trim();
     if (plate.isEmpty) {
       setState(() {
@@ -35,7 +36,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
     }
 
     try {
-      final response = await widget.apiService.checkTicketStatus(plate);
+      final response = await apiService.checkTicketStatus(plate);
       print(response);
 
       setState(() {
@@ -92,7 +93,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
     });
   }
 
-  void _submitFine() async {
+  void _submitFine(ApiService apiService) async {
     String plate = _plateController.text.trim();
     if (plate.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -183,7 +184,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
           }
 
           try {
-            final response = await widget.apiService.submitFine(plate, reason, amount);
+            final response = await apiService.submitFine(plate, reason, amount);
 
             if (response) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -211,6 +212,9 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final apiService = appState.apiService;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Parking Controller'),
@@ -233,7 +237,9 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _checkTicketStatus,
+                    onPressed: (){
+                      _checkTicketStatus(apiService!);
+                    },
                     child: Text('Check Ticket Status'),
                   ),
                   SizedBox(height: 16),
@@ -243,7 +249,9 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _submitFine,
+                    onPressed: (){
+                      _submitFine(apiService!);
+                    },
                     child: Text('Submit Fine'),
                   ),
                   SizedBox(height: 16),
@@ -310,7 +318,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
                             onPressed: () {
                               // Add functionality for the new button here
                             _plateController.text = _chalkedCars[index];
-                            _checkTicketStatus();
+                            _checkTicketStatus(apiService!);
                             },
                             ),
                             IconButton(

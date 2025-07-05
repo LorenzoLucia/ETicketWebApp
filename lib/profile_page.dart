@@ -1,6 +1,9 @@
+import 'package:eticket_web_app/services/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   final ApiService apiService;
@@ -175,6 +178,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
     return Scaffold(
       appBar: AppBar(title: Text('Profile Page')),
       body: Padding(
@@ -290,7 +294,13 @@ class _ProfilePageState extends State<ProfilePage> {
             ElevatedButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
-                Navigator.of(context).pushReplacementNamed('/login');
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (context.mounted) {
+                    appState.clear();
+                    context.go('/');
+                  }
+                });
+                // Navigator.of(context).pushReplacementNamed('/login');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orangeAccent,

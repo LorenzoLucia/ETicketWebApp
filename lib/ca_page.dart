@@ -1,13 +1,14 @@
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:eticket_web_app/services/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/users_managment_page.dart';
 import 'package:eticket_web_app/zones_management_page.dart';
+import 'package:provider/provider.dart';
 
 class CustomerAdminPage extends StatefulWidget {
-  final ApiService apiService;
-  final Map<String, dynamic> userData;
 
-  const CustomerAdminPage({super.key, required this.apiService, required this.userData});
+
+  const CustomerAdminPage({super.key,});
   @override
   _CustomerAdminPageState createState() => _CustomerAdminPageState();
 }
@@ -23,13 +24,15 @@ class _CustomerAdminPageState extends State<CustomerAdminPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final apiService = appState.apiService;
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = UsersManagementPage(apiService: widget.apiService,);
+        page = UsersManagementPage(apiService: apiService!,);
         break;
       case 1:
-        page = ZonesManagementPage(apiService: widget.apiService,);
+        page = ZonesManagementPage(apiService: apiService!,);
         break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');
