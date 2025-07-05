@@ -103,7 +103,7 @@ class _PayScreenState extends State<PayScreen> {
             appBar: AppBar(title: Text('Payment')),
             body: Center(child: Text('Error loading payment methods')),
           );
-        } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+        } else if (snapshot.hasData) {
           return PaymentMethodsPage(
             paymentMethods: snapshot.data!,
             onPaymentMethodSelected: (selectedMethod) {

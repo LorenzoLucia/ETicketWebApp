@@ -31,6 +31,16 @@ class HomeScreen extends StatelessWidget {
     final appState = Provider.of<AppState>(context, listen: false);
     // final apiService = appState.apiService!;
     final userData = appState.userData!;
+    if(userData.isEmpty) {
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //     if (context.mounted) {
+      //       context.go('/');
+      //     }
+      //   });
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    }
     print('User data: $userData');
 
     switch (userData['role']) {

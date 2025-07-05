@@ -14,10 +14,12 @@ void main() async {
   try {
     await dotenv.load(fileName: "assets/.env"); // Debug print statement
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    runApp(ChangeNotifierProvider(
+    runApp(
+      ChangeNotifierProvider<AppState>(
       create: (_) => AppState(baseUrl),
       child: MyApp(),
-    ));
+      ),
+    );
   } catch (e) {
     runApp(MaterialApp(
       home: Scaffold(
