@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/pay_screen.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:go_router/go_router.dart';
 import 'wheel_time_picker_widget.dart';
 
 class TicketPage extends StatefulWidget {
@@ -153,47 +154,50 @@ class _TicketPageState extends State<TicketPage> {
                     context: context,
                     builder: (context) {
                       String newPlate = '';
-                      return AlertDialog(
+                        return AlertDialog(
                         title: Text('Enter New Plate'),
                         content: TextField(
                           onChanged: (text) {
-                            newPlate = text;
+                          newPlate = text;
                           },
                           decoration: InputDecoration(hintText: 'Plate number'),
                         ),
                         actions: [
                           TextButton(
-                            onPressed: () {
-                              setState(() {
-                                plate = newPlate;
-                                if (!registeredPlates.contains(newPlate)) {
-                                  registeredPlates.add(newPlate);
-                                }
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('OK'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('Cancel'),
                           ),
                           TextButton(
-                            onPressed: () async {
-                              try {
-                                await widget.apiService.addPlate(newPlate);
-                                setState(() {
-                                  plate = newPlate;
-                                  if (!registeredPlates.contains(newPlate)) {
-                                    registeredPlates.add(newPlate);
-                                  }
-                                });
-                                Navigator.of(context).pop();
-                              } catch (e) {
-                                // Handle error
-                                print('Error saving plate: $e');
+                          onPressed: () async {
+                            if (newPlate.length >= 3) {
+                            try {
+                              await widget.apiService.addPlate(newPlate);
+                              setState(() {
+                              plate = newPlate;
+                              if (!registeredPlates.contains(newPlate)) {
+                                registeredPlates.add(newPlate);
                               }
-                            },
-                            child: Text('Save'),
+                              });
+                              Navigator.of(context).pop();
+                            } catch (e) {
+                              // Handle error
+                              print('Error saving plate: $e');
+                            }
+                            } else {
+                            // Show error message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                              content: Text('Plate must be at least 3 characters long'),
+                              ),
+                            );
+                            }
+                          },
+                          child: Text('Save'),
                           ),
                         ],
-                      );
+                        );
                     },
                   );
                 } else {
@@ -216,19 +220,20 @@ class _TicketPageState extends State<TicketPage> {
                 onPressed:
                     selectedZone != null && plate != null
                         ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => PayScreen(
-                                    amount: price,
-                                    duration: selectedTime,
-                                    zone: selectedZone!,
-                                    plate: plate!,
-                                    apiService: widget.apiService,
-                                  ),
-                            ),
-                          );
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (context.mounted) {
+                              context.go(
+                                '/payment',
+                                extra: {
+                                  'amount': price,
+                                  'duration': selectedTime,
+                                  'plate': plate,
+                                  'zone': selectedZone,
+                                }
+                              );
+                            }
+                          });
+                          
                         }
                         : null,
                 child: Text('Proceed to Payment'),

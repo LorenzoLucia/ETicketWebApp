@@ -1,19 +1,22 @@
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:eticket_web_app/services/app_state.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import 'registration_page.dart';
-import 'home.dart';
+// import 'registration_page.dart';
+// import 'home.dart';
 
 class AuthGate extends StatelessWidget {
-  final ApiService apiService;
+  // final ApiService apiService;
 
-  const AuthGate({super.key, required this.apiService});
+  const AuthGate({super.key});
 
-  Future<Map<String, dynamic>> getUserData() async {
+  Future<Map<String, dynamic>> getUserData(ApiService? apiService) async {
     try {
-      return await apiService.getMe().timeout(
+      return await apiService!.getMe().timeout(
         const Duration(seconds: 5),
         onTimeout: () {
           // Handle timeout appropriately
@@ -30,6 +33,9 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final apiService = appState.apiService;
+
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
@@ -71,7 +77,7 @@ class AuthGate extends StatelessWidget {
 
         final user = snapshot.data!;
         return FutureBuilder<Map<String, dynamic>>(
-          future: getUserData(),
+          future: getUserData(apiService),
           builder: (context, userDataSnapshot) {
             if (userDataSnapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -117,19 +123,26 @@ class AuthGate extends StatelessWidget {
             if (data['is_registered'] == false) {
               // User not registered
               print('User not registered');
-              return RegistrationPage(
-                apiService: apiService,
-                userData: data["user_data"],
-              );
+
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (context.mounted) {
+                  context.go('/register');
+                }
+              });
             } else {
               // User registered but no payment methods
               print('User registered');
-              return HomeScreen(
-                apiService: apiService,
-                userData: data["user_data"],
-                uid: data["user_id"],
-              );
+              appState.setUserData(data["user_data"]);
+              apiService?.setUserId(data["user_id"]);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (context.mounted) {
+                  context.go('/home');
+                }
+              });
             }
+            return Center(
+              child: CircularProgressIndicator(),
+            );
 
             // if (user.metadata.creationTime == user.metadata.lastSignInTime) {
             //   // User just registered
@@ -137,7 +150,7 @@ class AuthGate extends StatelessWidget {
             //     apiService: apiService,
             //     userData: data["user_data"],
             //   );
-            // } else {
+            // } else {r
             //   // User logged in
             //   return HomeScreen(
             //     apiService: apiService,
