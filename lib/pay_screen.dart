@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:eticket_web_app/services/api_service.dart';
 
 // Future<bool> hasRegisteredPaymentMethods() async {
@@ -28,7 +26,7 @@ class PayScreen extends StatefulWidget {
   final String? plate;
   final ApiService apiService;
 
-  PayScreen({
+  const PayScreen({
     super.key,
     required this.amount,
     required this.duration,

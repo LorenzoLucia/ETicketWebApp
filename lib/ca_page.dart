@@ -2,13 +2,12 @@ import 'package:eticket_web_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/users_managment_page.dart';
 import 'package:eticket_web_app/zones_management_page.dart';
-import 'package:eticket_web_app/services/api_service.dart';
 
 class CustomerAdminPage extends StatefulWidget {
   final ApiService apiService;
   final Map<String, dynamic> userData;
 
-  CustomerAdminPage({super.key, required this.apiService, required this.userData});
+  const CustomerAdminPage({super.key, required this.apiService, required this.userData});
   @override
   _CustomerAdminPageState createState() => _CustomerAdminPageState();
 }
@@ -16,11 +15,11 @@ class CustomerAdminPage extends StatefulWidget {
 class _CustomerAdminPageState extends State<CustomerAdminPage> {
   var selectedIndex = 0;
 
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  String _selectedRole = 'User';
-  final List<String> _roles = ['User', 'Controller', 'Customer Administrator', 'System Administrator'];
+  // final TextEditingController _usernameController = TextEditingController();
+  // final TextEditingController _emailController = TextEditingController();
+  // final TextEditingController _passwordController = TextEditingController();
+  // String _selectedRole = 'User';
+  // final List<String> _roles = ['User', 'Controller', 'Customer Administrator', 'System Administrator'];
 
   @override
   Widget build(BuildContext context) {
