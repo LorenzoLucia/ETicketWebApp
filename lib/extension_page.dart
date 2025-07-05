@@ -92,7 +92,7 @@ class _ExtensionPageState extends State<ExtensionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Select extension time.')),
+      appBar: AppBar(title: Text('Select extension time')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -104,7 +104,7 @@ class _ExtensionPageState extends State<ExtensionPage> {
             ),
             SizedBox(height: 20),
             Text(
-              'Select New End Time:',
+              'Select Extension Duration:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
 
@@ -127,6 +127,8 @@ class _ExtensionPageState extends State<ExtensionPage> {
             //   },
             // ),
             TimePickerTextField(
+              ticketEndTime: expirationDateTime,
+              title: "Select Ticket Extension Time",
               initialTime: Duration(hours: now.hour, minutes: now.minute),
               onTimeChanged: (Duration value) {
                 setState(() {

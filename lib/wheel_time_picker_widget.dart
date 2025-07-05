@@ -4,9 +4,16 @@ import 'package:flutter/material.dart';
 class TimePickerTextField extends StatefulWidget {
   final Function(Duration)? onTimeChanged;
   final Duration? initialTime;
+  final String? title;
+  final DateTime? ticketEndTime;
 
-  const TimePickerTextField({Key? key, this.onTimeChanged, this.initialTime})
-    : super(key: key);
+  const TimePickerTextField({
+    Key? key,
+    this.onTimeChanged,
+    this.initialTime,
+    this.title,
+    this.ticketEndTime,
+  }) : super(key: key);
 
   @override
   State<TimePickerTextField> createState() => _TimePickerTextFieldState();
@@ -35,8 +42,8 @@ class _TimePickerTextFieldState extends State<TimePickerTextField> {
   }
 
   DateTime _calculateTicketEndTime(Duration ticketDuration) {
-    DateTime now = DateTime.now();
-    return now.add(ticketDuration);
+    DateTime date = widget.ticketEndTime ?? DateTime.now();
+    return date.add(ticketDuration);
   }
 
   Duration _calculateDifference(Duration pickedTime) {
@@ -110,6 +117,7 @@ class _TimePickerTextFieldState extends State<TimePickerTextField> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
+            String? title = widget.title;
             return Container(
               height: MediaQuery.of(context).size.height * 0.6,
               decoration: const BoxDecoration(
@@ -145,8 +153,8 @@ class _TimePickerTextFieldState extends State<TimePickerTextField> {
                             style: TextStyle(color: Colors.red, fontSize: 18),
                           ),
                         ),
-                        const Text(
-                          'Select Ticket Duration',
+                        Text(
+                          title ?? 'Select Ticket Duration',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
