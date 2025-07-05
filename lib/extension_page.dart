@@ -26,7 +26,8 @@ class ExtensionPage extends StatefulWidget {
 
 class _ExtensionPageState extends State<ExtensionPage> {
   String? selectedZone;
-  double selectedTime = 1; // Default to 1 hour
+  int selectedTimeHours = 1; // Default to 1 hour
+  int selectedTimeMinutes = 0; // Default to 0 minutes
   double price = 0.0;
   String? id;
   DateTime? expirationDateTime;
@@ -80,7 +81,9 @@ class _ExtensionPageState extends State<ExtensionPage> {
     if (selectedZone != null) {
       setState(() {
         price = double.parse(
-          (zonePrices[selectedZone]! * selectedTime).toStringAsFixed(1),
+          (zonePrices[selectedZone]! *
+                  (selectedTimeHours + selectedTimeMinutes / 60))
+              .toStringAsFixed(1),
         );
       });
     }
@@ -125,9 +128,10 @@ class _ExtensionPageState extends State<ExtensionPage> {
             // ),
             TimePickerTextField(
               initialTime: Duration(hours: now.hour, minutes: now.minute),
-              onTimeChanged: (double value) {
+              onTimeChanged: (Duration value) {
                 setState(() {
-                  selectedTime = value;
+                  selectedTimeHours = value.inHours;
+                  selectedTimeMinutes = value.inMinutes.remainder(60);
                 });
                 calculatePrice();
               },
@@ -146,16 +150,18 @@ class _ExtensionPageState extends State<ExtensionPage> {
                 onPressed:
                     selectedZone != null
                         ? () {
-                          context.go('/payment',
+                          context.go(
+                            '/payment',
                             extra: {
                               'amount': price,
-                              'duration': selectedTime,
+                              'duration':
+                                  selectedTimeHours + selectedTimeMinutes / 60,
                               'plate': widget.plate,
                               'id': id,
                               'zone': selectedZone,
                               'expirationDateTime': expirationDateTime,
-                            }
-                         );
+                            },
+                          );
                         }
                         : null,
                 child: Text('Proceed to Payment'),
