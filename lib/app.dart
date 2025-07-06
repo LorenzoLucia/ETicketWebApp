@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:eticket_web_app/services/app_state.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:web/web.dart';
+// import 'package:web/web.dart';
 
 import 'auth_gate.dart';
 
@@ -22,7 +22,21 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/admin',
-      builder: (context, state) => CustomerAdminPage(),
+      builder: (context, state){
+        final appState = Provider.of<AppState>(context, listen: false);
+        if (appState.userData == null) {
+
+          appState.setApiService(ApiService(appState.baseUrl));
+
+          // if(appState.userData!['role'] != 'CONTROLLER') {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              GoRouter.of(context).go('/');
+            });
+            return const Center(child: CircularProgressIndicator());
+        }
+
+        return CustomerAdminPage();
+        },
     ),
     GoRoute(
       path: '/payment',
@@ -70,12 +84,12 @@ final router = GoRouter(
       // Fetch user data if not already set
           // FirebaseAuth.instance.signOut();
           appState.setApiService(ApiService(appState.baseUrl));
-          appState.apiService!.getMe().then((userData) {
-            appState.setUserData(userData['user_data']);
-          }).catchError((error) {
-            print('Error fetching user data: $error');
+          // appState.apiService!.getMe().then((userData) {
+          //   appState.setUserData(userData['user_data']);
+          // }).catchError((error) {
+          //   print('Error fetching user data: $error');
             // Handle error appropriately, e.g., show a dialog or snackbar
-          });
+          // });
           WidgetsBinding.instance.addPostFrameCallback((_) {
             GoRouter.of(context).go('/');
           });
@@ -86,7 +100,31 @@ final router = GoRouter(
         },
     ),
     GoRoute(path: '/controller',
-      builder: (context, state) => ParkingControllerPage(),
+      builder: (context, state){
+        final appState = Provider.of<AppState>(context, listen: false);
+        if (appState.userData == null) {
+      // Fetch user data if not already set
+          // FirebaseAuth.instance.signOut();
+          appState.setApiService(ApiService(appState.baseUrl));
+          // appState.setUserData(await appState.apiService!.getMe()['user_data']);
+          // .then((userData) {
+          //   appState.setUserData(userData['user_data']);
+          // }).catchError((error) {
+          //   print('Error fetching user data: $error');
+          //   // Handle error appropriately, e.g., show a dialog or snackbar
+          // });
+
+          // if(appState.userData!['role'] != 'CONTROLLER') {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              GoRouter.of(context).go('/');
+            });
+            return const Center(child: CircularProgressIndicator());// Wait for user data to be fetched
+          // }
+          // return const Center(child: CircularProgressIndicator());// Wait for user data to be fetched
+        }
+
+        return ParkingControllerPage();
+      },
     ),
     GoRoute(
       path: '/register',

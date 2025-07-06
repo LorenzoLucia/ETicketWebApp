@@ -58,7 +58,7 @@ class _PurchasedPage extends State<PurchasedPage> {
         return false;
       }
       setState(() {
-        tickets = response;
+        tickets = response..sort((a, b) => DateTime.parse(b['start_time']).compareTo(DateTime.parse(a['start_time'])));
       });
       
       return true;

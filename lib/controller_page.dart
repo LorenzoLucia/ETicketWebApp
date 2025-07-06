@@ -19,6 +19,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
   String _ticketEndTime = '';
   String _ticketCost = '';
   String _zone = '';
+  String _ticketPlate = '';
   List<String> _chalkedCars = [];
 
   void _checkTicketStatus(ApiService apiService) async {
@@ -31,6 +32,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
         _ticketEndTime = '';
         _ticketCost = '';
         _zone = '';
+        _ticketPlate = '';
       });
       return;
     }
@@ -56,6 +58,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
           _ticketEndTime = response['end_time'];
           _ticketCost = response['price'].toString();
           _zone = response['zone']['name'];
+          _ticketPlate = plate;
         } else {
           _ticketStatus = 'Ticket not found.';
           _statusColor = Colors.red;
@@ -63,6 +66,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
           _ticketEndTime = '';
           _ticketCost = '';
           _zone = '';
+          _ticketPlate = '';
         }
       });
     } catch (e) {
@@ -73,6 +77,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
         _ticketEndTime = '';
         _ticketCost = '';
         _zone = '';
+        _ticketPlate = '';
       });
       print('Error checking ticket status: $e');
     }
@@ -101,27 +106,6 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
       );
       return;
     }
-
-    // if (_ticketStatus == 'Ticket is valid.') {
-    //   showDialog(
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return AlertDialog(
-    //         title: Text('Cannot Submit Fine'),
-    //         content: Text('The ticket for plate "$plate" is valid. You cannot submit a fine.'),
-    //         actions: [
-    //           TextButton(
-    //             onPressed: () {
-    //               Navigator.of(context).pop();
-    //             },
-    //             child: Text('OK'),
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   );
-    //   return;
-    // }
 
     showDialog(
       context: context,
@@ -163,7 +147,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
         ),
         TextButton(
           onPressed: () async {
-          Navigator.of(context).pop();
+          
 
           String reason = reasonController.text.trim();
           String amountText = amountController.text.trim();
@@ -185,6 +169,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
 
           try {
             final response = await apiService.submitFine(plate, reason, amount);
+            print(response);
 
             if (response) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -192,14 +177,15 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
             );
             } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to submit fine for plate "$plate".')),
+              SnackBar(content: Text('Failed to submit fine for plate "$plate", fine yet submitted today.')),
             );
             }
           } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error submitting fine for plate "$plate".')),
+            SnackBar(content: Text('Error submitting fine for plate "$plate": $e')),
             );
           }
+          Navigator.of(context).pop();
           },
           child: Text('Submit'),
         ),
@@ -280,9 +266,10 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
                         ),
                         if (_ticketStartTime.isNotEmpty) ...[
                           SizedBox(height: 8),
+                          Text('Plate: $_ticketPlate'),
                           Text('Start Time: $_ticketStartTime'),
                           Text('End Time: $_ticketEndTime'),
-                          Text('Cost: $_ticketCost'),
+                          Text('Cost: ${double.parse(_ticketCost).toStringAsFixed(2)}'),
                           Text('Zone: ${_zone}'),
                         ],
                       ],
