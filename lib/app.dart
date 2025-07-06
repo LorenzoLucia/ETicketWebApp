@@ -33,6 +33,11 @@ final router = GoRouter(
               GoRouter.of(context).go('/');
             });
             return const Center(child: CircularProgressIndicator());
+        } else if(appState.userData!['role'] != 'CUSTOMER_ADMINISTRATOR' && appState.userData!['role'] != 'SYSTEM_ADMINISTRATOR') {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            GoRouter.of(context).go('/');
+          });
+          return const Center(child: CircularProgressIndicator());
         }
 
         return CustomerAdminPage();
@@ -121,6 +126,11 @@ final router = GoRouter(
             return const Center(child: CircularProgressIndicator());// Wait for user data to be fetched
           // }
           // return const Center(child: CircularProgressIndicator());// Wait for user data to be fetched
+        }else if(appState.userData!['role'] != 'CONTROLLER') {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            GoRouter.of(context).go('/');
+          });
+          return const Center(child: CircularProgressIndicator());
         }
 
         return ParkingControllerPage();
@@ -128,7 +138,17 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/register',
-      builder: (context, state) => RegistrationPage(),
+      builder: (context, state) {
+        final appState = Provider.of<AppState>(context, listen: false);
+        if(appState.userData != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            GoRouter.of(context).go('/');
+          });
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return RegistrationPage();
+        }  ,
     ),
   ],
   redirect: (context, state) {

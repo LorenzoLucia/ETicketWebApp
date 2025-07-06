@@ -1,6 +1,8 @@
 import 'package:eticket_web_app/services/app_state.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 
@@ -204,6 +206,17 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Parking Controller'),
+        actions: [
+              IconButton(
+                icon: Icon(Icons.logout),
+                onPressed: () {
+                  // Handle logout logic here
+                  FirebaseAuth.instance.signOut();
+                  appState.clear();
+                  context.go('/');
+                },
+              ),
+            ],
       ),
       body: Row(
         children: [

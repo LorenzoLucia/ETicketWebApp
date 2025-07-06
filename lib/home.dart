@@ -5,6 +5,8 @@ import 'package:eticket_web_app/services/api_service.dart';
 import 'package:eticket_web_app/services/app_state.dart';
 import 'package:eticket_web_app/ticket_page.dart';
 import 'package:eticket_web_app/purchased_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -79,6 +81,7 @@ class HomeScreen extends StatelessWidget {
                 icon: Icon(Icons.logout),
                 onPressed: () {
                   // Handle logout logic here
+                  FirebaseAuth.instance.signOut();
                   appState.clear();
                   context.go('/');
                 },

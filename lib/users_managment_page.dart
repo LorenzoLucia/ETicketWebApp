@@ -1,5 +1,7 @@
+import 'package:eticket_web_app/services/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:provider/provider.dart';
 
 class UsersManagementPage extends StatefulWidget {
   final ApiService apiService;
@@ -170,7 +172,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
     );
   }
 
-  void _addUser() {
+  void _addUser(sa_flag) {
     TextEditingController emailController = TextEditingController();
     TextEditingController nameController = TextEditingController();
     TextEditingController surnameController = TextEditingController();
@@ -185,28 +187,30 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+              controller: emailController,
+              decoration: InputDecoration(labelText: 'Email'),
               ),
               TextField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: 'Name'),
+              controller: nameController,
+              decoration: InputDecoration(labelText: 'Name'),
               ),
               TextField(
-                controller: surnameController,
-                decoration: InputDecoration(labelText: 'Surname'),
+              controller: surnameController,
+              decoration: InputDecoration(labelText: 'Surname'),
               ),
               DropdownButtonFormField<String>(
-                value: selectedRole,
-                items: ['User', 'Controller', 'Customer Administrator', 'System Administrator']
-                    .map((role) => DropdownMenuItem(value: role, child: Text(role)))
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    selectedRole = value;
-                  }
-                },
-                decoration: InputDecoration(labelText: 'Role'),
+              value: selectedRole,
+              items: (sa_flag
+                  ? ['User', 'Controller', 'Customer Administrator', 'System Administrator']
+                  : ['User', 'Controller'])
+                .map((role) => DropdownMenuItem(value: role, child: Text(role)))
+                .toList(),
+              onChanged: (value) {
+                if (value != null) {
+                selectedRole = value;
+                }
+              },
+              decoration: InputDecoration(labelText: 'Role'),
               ),
             ],
           ),
@@ -243,6 +247,10 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    // final apiService = appState.apiService;
+    final sa_flag = appState.userData!['role'] == 'SYSTEM_ADMINISTRATOR';
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Users Management'),
@@ -253,7 +261,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
               'Add User',
               style: TextStyle(fontSize: 18),
             ),
-            onPressed: _addUser,
+            onPressed: () => _addUser(sa_flag),
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
@@ -292,12 +300,12 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () => _modifyUser(index),
+                      icon: Icon(Icons.edit),
+                      onPressed: sa_flag || user['role'] != 'SYSTEM_ADMINISTRATOR'? () => _modifyUser(index) : null,
                       ),
                       IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () => _deleteUser(index),
+                      icon: Icon(Icons.delete),
+                      onPressed: sa_flag || user['role'] != 'SYSTEM_ADMINISTRATOR'? () => _deleteUser(index) : null,
                       ),
                     ],
                   ),

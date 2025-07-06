@@ -1,8 +1,10 @@
-import 'package:eticket_web_app/services/api_service.dart';
+// import 'package:eticket_web_app/services/api_service.dart';
 import 'package:eticket_web_app/services/app_state.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/users_managment_page.dart';
 import 'package:eticket_web_app/zones_management_page.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class CustomerAdminPage extends StatefulWidget {
@@ -26,6 +28,7 @@ class _CustomerAdminPageState extends State<CustomerAdminPage> {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context, listen: false);
     final apiService = appState.apiService;
+    final sa_flag = appState.userData!['role'] == 'SYSTEM_ADMINISTRATOR';
     Widget page;
     switch (selectedIndex) {
       case 0:
@@ -41,6 +44,19 @@ class _CustomerAdminPageState extends State<CustomerAdminPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Scaffold(
+          appBar: AppBar(
+            title: Text('Administrator'),
+            actions: [
+                  IconButton(
+                    icon: Icon(Icons.logout),
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut();
+                      appState.clear();
+                      context.go('/');
+                    },
+                  ),
+                ],
+          ),
           body: Row(
             children: [
               SafeArea(
