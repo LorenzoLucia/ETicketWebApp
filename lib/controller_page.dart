@@ -22,6 +22,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
   String _ticketCost = '';
   String _zone = '';
   String _ticketPlate = '';
+  bool already_fined = false;
   List<String> _chalkedCars = [];
 
   void _checkTicketStatus(ApiService apiService) async {
@@ -44,6 +45,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
       print(response);
 
       setState(() {
+        already_fined = response['fine_issued'];
         if (response['has_ticket']) {
           DateTime endTime = DateTime.parse(response['end_time']);
           DateTime currentTime = DateTime.now();
@@ -80,6 +82,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
         _ticketCost = '';
         _zone = '';
         _ticketPlate = '';
+        already_fined = false;
       });
       print('Error checking ticket status: $e');
     }
@@ -101,6 +104,12 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
   }
 
   void _submitFine(ApiService apiService) async {
+    if (already_fined) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fine already issued for this plate today.')),
+      );
+      return;
+    }
     String plate = _plateController.text.trim();
     if (plate.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
