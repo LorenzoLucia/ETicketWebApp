@@ -74,13 +74,13 @@ class _TicketPageState extends State<TicketPage> {
     int hour = date.hour;
     int minutes = date.minute;
 
-    return '$day of $month at $hour:$minutes';
+    return '$day of $month at ${hour.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
   }
 
   Future<void> loadPrices() async {
     try {
       final prices = await widget.apiService.fetchZonePrices();
-      print('Zone prices loaded: $prices');
+
       setState(() {
         zonePrices = prices;
       });
@@ -158,7 +158,6 @@ class _TicketPageState extends State<TicketPage> {
                     initialTime: Duration(hours: 1),
                     onTimeChanged: (Duration value) {
                       setState(() {
-                        print(value);
                         selectedTimeHours = value.inHours;
                         selectedTimeMinutes = value.inMinutes.remainder(60);
                       });

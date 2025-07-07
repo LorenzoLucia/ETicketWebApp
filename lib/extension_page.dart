@@ -30,7 +30,7 @@ class _ExtensionPageState extends State<ExtensionPage> {
   int selectedTimeMinutes = 0; // Default to 0 minutes
   double price = 0.0;
   String? id;
-  DateTime? expirationDateTime;
+  late DateTime expirationDateTime;
   DateTime now = DateTime.now();
 
   @override
@@ -89,6 +89,33 @@ class _ExtensionPageState extends State<ExtensionPage> {
     }
   }
 
+  String calculateTicketEndTime() {
+    DateTime date = expirationDateTime!.add(
+      Duration(hours: selectedTimeHours, minutes: selectedTimeMinutes),
+    );
+    Map<int, String> months = {
+      1: "January",
+      2: "February",
+      3: "March",
+      4: "April",
+      5: "May",
+      6: "June",
+      7: "July",
+      8: "August",
+      9: "September",
+      10: "October",
+      11: "November",
+      12: "December",
+    };
+
+    String month = months[date.month]!;
+    int day = date.day;
+    int hour = date.hour;
+    int minutes = date.minute;
+
+    return '$day of $month at ${hour.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,20 +153,34 @@ class _ExtensionPageState extends State<ExtensionPage> {
             //     });
             //   },
             // ),
-            TimePickerTextField(
-              ticketEndTime: expirationDateTime,
-              title: "Select Ticket Extension Time",
-              initialTime: Duration(hours: now.hour, minutes: now.minute),
-              onTimeChanged: (Duration value) {
-                setState(() {
-                  selectedTimeHours = value.inHours;
-                  selectedTimeMinutes = value.inMinutes.remainder(60);
-                });
-                calculatePrice();
-              },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TimePickerTextField(
+                    ticketEndTime: expirationDateTime,
+                    title: "Select Ticket Extension Time",
+                    initialTime: Duration(hours: now.hour, minutes: now.minute),
+                    onTimeChanged: (Duration value) {
+                      setState(() {
+                        selectedTimeHours = value.inHours;
+                        selectedTimeMinutes = value.inMinutes.remainder(60);
+                      });
+                      calculatePrice();
+                    },
+                  ),
+                  SizedBox(width: 25),
+                  Text(
+                    'New End Time: ${calculateTicketEndTime()}',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
 
             SizedBox(height: 20),
+
             Text(
               selectedZone != null
                   ? 'Price: \$${price.toStringAsFixed(2)}'

@@ -95,14 +95,13 @@ class _TimePickerTextFieldState extends State<TimePickerTextField> {
     int hour = date.hour;
     int minutes = date.minute;
 
-    return '$day of $month at $hour:$minutes';
+    return '$day of $month at ${hour.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
   }
 
   void _updateTextField() {
     if (selectedTime != null) {
       Duration difference = _calculateDifference(selectedTime!);
       _convertDurationToHours(difference);
-      print(_formatTime(selectedTime!));
       _controller.text = _formatTime(selectedTime!);
     } else {
       _controller.clear();
