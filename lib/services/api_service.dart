@@ -430,7 +430,6 @@ class ApiService {
     }
   }
 
-  // TO BE IMPLEMENTED IN BackEnd //
   Future<Map<String, dynamic>> checkTicketStatus(String plate) async {
     final tokenId = await getTokenId();
     final url = Uri.parse('$baseUrl/tickets/$plate');
@@ -508,4 +507,52 @@ class ApiService {
       throw Exception('Error paying ticket: $e');
     }
   }
+
+
+  Future<bool> chalk(String plate) async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/chalk/$user_id/$plate');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Error adding chalked plate: $e');
+    }
+  }
+
+  Future<bool> removeChalk(String plate) async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/chalk/$user_id/$plate');
+    try {
+      final response = await http.delete(
+        url,
+        headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Error removing chalked plate: $e');
+    }
+  }
+
+  Future<List<String>> fetchChalkedCars() async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/chalk/$user_id');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'auth': (tokenId ?? '')},
+      );
+      if (response.statusCode == 200) {
+        return List<String>.from(json.decode(response.body));
+      } else {
+        throw Exception('Failed to load chalked plates');
+      }
+    } catch (e) {
+      throw Exception('Error fetching chalked plates: $e');
+    }
+  }
+
 }

@@ -25,6 +25,12 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
   bool already_fined = false;
   List<String> _chalkedCars = [];
 
+  @override
+  void initState() {
+    super.initState();
+    fetchChalkedCars(Provider.of<AppState>(context, listen: false).apiService!);
+  }
+
   void _checkTicketStatus(ApiService apiService) async {
     String plate = _plateController.text.trim();
     if (plate.isEmpty) {
@@ -88,19 +94,60 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
     }
   }
 
-  void _chalkCar() {
+  void _chalkCar(ApiService apiService) async {
     String plate = _plateController.text.trim();
-    if (plate.isNotEmpty && !_chalkedCars.contains(plate)) {
-      setState(() {
-        _chalkedCars.add(plate);
-      });
+    if (_chalkedCars.contains(plate)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Car with plate $plate is already chalked.')),
+      );
+      return;
+    }
+    try {
+      final response = await apiService.chalk(plate);
+      if (response){
+        setState(() {
+          _chalkedCars.add(plate);
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to chalk car: $plate')),
+        ); 
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error chalking car: $e')),
+      );
     }
   }
 
-  void _removeChalkedCar(String plate) {
-    setState(() {
-      _chalkedCars.remove(plate);
-    });
+  void _removeChalkedCar(String plate, ApiService apiService) async {
+    try {
+      final response = await apiService.removeChalk(plate);
+      if (response){
+        setState(() {
+          _chalkedCars.remove(plate);
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to remove chalked car: $plate')),
+        ); 
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error removing chalked car: $e')),
+      );
+    }
+  }
+
+  void fetchChalkedCars(ApiService apiService) async {
+    try {
+      final response = await apiService.fetchChalkedCars();
+      setState(() {
+        _chalkedCars = List<String>.from(response);
+      });
+    } catch (e) {
+      print('Error fetching chalked cars: $e');
+    }
   }
 
   void _submitFine(ApiService apiService) async {
@@ -252,7 +299,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _chalkCar,
+                    onPressed: () => _chalkCar(apiService!),
                     child: Text('Chalk Car'),
                   ),
                   SizedBox(height: 16),
@@ -332,7 +379,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
                             ),
                             IconButton(
                             icon: Icon(Icons.delete),
-                            onPressed: () => _removeChalkedCar(_chalkedCars[index]),
+                            onPressed: () => _removeChalkedCar(_chalkedCars[index], apiService!),
                             ),
                           ],
                           ),
