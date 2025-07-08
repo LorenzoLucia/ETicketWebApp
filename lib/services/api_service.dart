@@ -555,4 +555,36 @@ class ApiService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> fetchFines() async {
+    try {
+      final tokenId = await getTokenId();
+      final response = await http.get(
+        Uri.parse('$baseUrl/fines'),
+        headers: {'auth': (tokenId ?? '')},
+      );
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(json.decode(response.body));
+      } else {
+        throw Exception('Failed to load fines');
+      }
+    } catch (e) {
+      // Handle errors appropriately
+      throw Exception('Error fetching fines: $e');
+    }
+  }
+
+  Future<bool> issueFine(String fineId) async {
+    final tokenId = await getTokenId();
+    final url = Uri.parse('$baseUrl/fines/$fineId/issue');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json', 'auth': (tokenId ?? '')},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      throw Exception('Error issuing fine: $e');
+    }
+  }
+
 }
