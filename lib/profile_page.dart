@@ -1,7 +1,9 @@
 import 'package:eticket_web_app/services/app_state.dart';
+import 'package:eticket_web_app/services/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -268,6 +270,13 @@ class _ProfilePageState extends State<ProfilePage> {
                       content: TextField(
                         controller: plateController,
                         decoration: InputDecoration(hintText: 'Enter plate'),
+                        inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-Z0-9]'),
+                            ),
+                            UpperCaseTextFormatter(),
+                          ],
+                        textCapitalization: TextCapitalization.characters,
                       ),
                       actions: [
                         TextButton(

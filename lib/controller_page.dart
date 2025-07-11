@@ -1,7 +1,9 @@
 import 'package:eticket_web_app/services/app_state.dart';
+import 'package:eticket_web_app/services/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -283,13 +285,20 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextField(
+                    TextField(
                     controller: _plateController,
                     decoration: InputDecoration(
                       labelText: 'Enter Plate Number',
                       border: OutlineInputBorder(),
                     ),
-                  ),
+                    inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-Z0-9]'),
+                            ),
+                            UpperCaseTextFormatter(),
+                          ],
+                    textCapitalization: TextCapitalization.characters,
+                    ),
                   SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: (){

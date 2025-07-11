@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 // import 'package:eticket_web_app/pay_screen.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'wheel_time_picker_widget.dart';
+import 'package:eticket_web_app/services/utils.dart';
 
 class TicketPage extends StatefulWidget {
   final ApiService apiService;
@@ -204,9 +206,16 @@ class _TicketPageState extends State<TicketPage> {
                         title: Text('Enter New Plate'),
                         content: TextField(
                           onChanged: (text) {
-                            newPlate = text;
+                          newPlate = text.toUpperCase();
                           },
                           decoration: InputDecoration(hintText: 'Plate number'),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-Z0-9]'),
+                            ),
+                            UpperCaseTextFormatter(),
+                          ],
+                          textCapitalization: TextCapitalization.characters,
                         ),
                         actions: [
                           TextButton(
