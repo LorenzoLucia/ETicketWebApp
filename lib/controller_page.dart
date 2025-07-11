@@ -72,7 +72,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
           _zone = response['zone']['name'];
           _ticketPlate = plate;
         } else {
-          _ticketStatus = 'Ticket not found.';
+          _ticketStatus = 'Ticket not found for $plate';
           _statusColor = Colors.red;
           _ticketStartTime = '';
           _ticketEndTime = '';
@@ -194,6 +194,12 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
             labelText: 'Amount to Pay',
             border: OutlineInputBorder(),
           ),
+          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9/]'),
+                            ),
+                            EuroPriceFormatter(),
+                          ],
           keyboardType: TextInputType.numberWithOptions(decimal: true),
           ),
         ],
@@ -219,7 +225,9 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
             return;
           }
 
-          double? amount = double.tryParse(amountText);
+          print("$amountText.");
+
+          double? amount = double.tryParse(amountText.substring(0, amountText.length - 2).replaceAll(',', '.'));
           if (amount == null) {
             ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Please enter a valid amount.')),

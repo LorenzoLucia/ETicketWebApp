@@ -1,5 +1,7 @@
+import 'package:eticket_web_app/services/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:flutter/services.dart';
 
 class ZonesManagementPage extends StatefulWidget {
   final ApiService apiService;
@@ -51,6 +53,12 @@ class _ZonesManagementPageState extends State<ZonesManagementPage> {
                 controller: priceController,
                 decoration: InputDecoration(labelText: 'Price'),
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9.]'),
+                            ),
+                            EuroPriceFormatter(),
+                          ],
               ),
             ],
           ),
@@ -180,6 +188,12 @@ class _ZonesManagementPageState extends State<ZonesManagementPage> {
                 controller: priceController,
                 decoration: InputDecoration(labelText: 'Price'),
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9.]'),
+                            ),
+                            EuroPriceFormatter(),
+                          ],
               ),
             ],
           ),

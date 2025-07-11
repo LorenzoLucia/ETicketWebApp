@@ -1,6 +1,8 @@
 import 'package:eticket_web_app/services/app_state.dart';
+import 'package:eticket_web_app/services/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -175,7 +177,12 @@ class NewPaymentMethodPage extends StatelessWidget {
                   labelText: 'Card Owner',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: TextInputType.number,
+                inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-Z\s]'),
+                            ),
+                          ],
+                keyboardType: TextInputType.text,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter card owner name and surname';
@@ -190,12 +197,18 @@ class NewPaymentMethodPage extends StatelessWidget {
                   labelText: 'Card Number',
                   border: OutlineInputBorder(),
                 ),
+                inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9]'),
+                            ),
+                            CardNumberFormatter(),
+                          ],
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your card number';
                   }
-                  if (value.length != 16) {
+                  if (value.length != 19) { // 16 digits + 3 spaces
                     return 'Card number must be 16 digits';
                   }
                   return null;
@@ -208,6 +221,12 @@ class NewPaymentMethodPage extends StatelessWidget {
                   labelText: 'Expiry Date (MM/YY)',
                   border: OutlineInputBorder(),
                 ),
+                inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9/]'),
+                            ),
+                            CardExpiryDateFormatter(),
+                          ],
                 keyboardType: TextInputType.datetime,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -226,6 +245,12 @@ class NewPaymentMethodPage extends StatelessWidget {
                   labelText: 'CVC',
                   border: OutlineInputBorder(),
                 ),
+                inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9]'),
+                            ),
+                            CvcFormatter(),
+                          ],
                 keyboardType: TextInputType.number,
                 obscureText: true,
                 validator: (value) {

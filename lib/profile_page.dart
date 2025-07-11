@@ -443,6 +443,11 @@ class RegisterPaymentMethodPage extends StatelessWidget {
                   labelText: 'Card owner',
                   border: OutlineInputBorder(),
                 ),
+                inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-Z\s]'),
+                            ),
+                          ],
                 keyboardType: TextInputType.text,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -458,12 +463,18 @@ class RegisterPaymentMethodPage extends StatelessWidget {
                   labelText: 'Card Number',
                   border: OutlineInputBorder(),
                 ),
+                inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9\s]'),
+                            ),
+                            CardNumberFormatter()
+                          ],
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your card number';
                   }
-                  if (value.length != 16) {
+                  if (value.length != 19) { // 16 digits + 3 spaces
                     return 'Card number must be 16 digits';
                   }
                   return null;
@@ -476,6 +487,12 @@ class RegisterPaymentMethodPage extends StatelessWidget {
                   labelText: 'Expiry Date (MM/YY)',
                   border: OutlineInputBorder(),
                 ),
+                inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9/]'),
+                            ),
+                            CardExpiryDateFormatter(),
+                          ],
                 keyboardType: TextInputType.datetime,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -494,6 +511,12 @@ class RegisterPaymentMethodPage extends StatelessWidget {
                   labelText: 'CVC',
                   border: OutlineInputBorder(),
                 ),
+                inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9]'),
+                            ),
+                            CvcFormatter(),
+                          ],
                 keyboardType: TextInputType.number,
                 obscureText: true,
                 validator: (value) {
@@ -575,6 +598,12 @@ class AddPlatePage extends StatelessWidget {
             TextField(
               controller: plateController,
               decoration: InputDecoration(labelText: 'Enter Plate'),
+              inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-Z0-9]'),
+                            ),
+                            UpperCaseTextFormatter(),
+                          ],
             ),
             SizedBox(height: 20),
             ElevatedButton(
