@@ -209,7 +209,7 @@ class _ZonesManagementPageState extends State<ZonesManagementPage> {
                 try {
                   final newZone = await widget.apiService.addZone(
                     nameController.text,
-                    double.parse(priceController.text),
+                    double.parse(priceController.text.replaceAll('.', '').replaceAll(',', '.').substring(0, priceController.text.length - 2)),
                   );
                   _fetchZones(); // Refresh the list
                   Navigator.of(context).pop();
