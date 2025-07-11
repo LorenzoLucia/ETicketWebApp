@@ -162,6 +162,8 @@ class _ExtensionPageState extends State<ExtensionPage> {
                     ticketEndTime: expirationDateTime,
                     title: "Select Ticket Extension Time",
                     initialTime: Duration(hours: now.hour, minutes: now.minute),
+                    shortDurationWarning:
+                        "Ticket extension time must be at least 5 minutes!",
                     onTimeChanged: (Duration value) {
                       setState(() {
                         selectedTimeHours = value.inHours;

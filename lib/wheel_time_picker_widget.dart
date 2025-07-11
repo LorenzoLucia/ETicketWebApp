@@ -6,6 +6,7 @@ class TimePickerTextField extends StatefulWidget {
   final Duration? initialTime;
   final String? title;
   final DateTime? ticketEndTime;
+  final String? shortDurationWarning;
 
   const TimePickerTextField({
     Key? key,
@@ -13,6 +14,7 @@ class TimePickerTextField extends StatefulWidget {
     this.initialTime,
     this.title,
     this.ticketEndTime,
+    this.shortDurationWarning,
   }) : super(key: key);
 
   @override
@@ -21,6 +23,7 @@ class TimePickerTextField extends StatefulWidget {
 
 class _TimePickerTextFieldState extends State<TimePickerTextField> {
   Duration selectedTime = Duration(hours: 1);
+  bool isDurationValid = true;
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -109,6 +112,7 @@ class _TimePickerTextFieldState extends State<TimePickerTextField> {
   }
 
   void _showTimePicker() {
+    isDurationValid = true;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -149,7 +153,11 @@ class _TimePickerTextFieldState extends State<TimePickerTextField> {
                           onPressed: () => Navigator.pop(context),
                           child: const Text(
                             'Cancel',
-                            style: TextStyle(color: Colors.red, fontSize: 18),
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         Text(
@@ -161,13 +169,15 @@ class _TimePickerTextFieldState extends State<TimePickerTextField> {
                         ),
                         TextButton(
                           onPressed: () {
-                            setState(() {
-                              _updateTextField();
-                            });
-                            if (widget.onTimeChanged != null) {
-                              widget.onTimeChanged!(selectedTime);
+                            if (isDurationValid) {
+                              setState(() {
+                                _updateTextField();
+                              });
+                              if (widget.onTimeChanged != null) {
+                                widget.onTimeChanged!(selectedTime);
+                              }
+                              Navigator.pop(context);
                             }
-                            Navigator.pop(context);
                           },
                           child: const Text(
                             'Confirm',
@@ -205,6 +215,28 @@ class _TimePickerTextFieldState extends State<TimePickerTextField> {
 
                   const SizedBox(height: 10),
 
+                  if (!isDurationValid)
+                    // Duration display row
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            widget.shortDurationWarning ??
+                                "Ticket must last at least 5 minutes!",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                              color: Color.fromARGB(255, 243, 33, 33),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  const SizedBox(height: 10),
+
                   // Time Picker
                   Expanded(
                     child: Container(
@@ -221,7 +253,13 @@ class _TimePickerTextFieldState extends State<TimePickerTextField> {
                         initialTimerDuration: selectedTime,
                         onTimerDurationChanged: (Duration newTime) {
                           setModalState(() {
-                            selectedTime = newTime;
+                            // If chosen time is shorter than 5 minutes you cannot buy that ticket (tickets must last at least 5 minutes)
+                            if (newTime.compareTo(Duration(minutes: 5)) < 0) {
+                              isDurationValid = false;
+                            } else {
+                              isDurationValid = true;
+                              selectedTime = newTime;
+                            }
                           });
                         },
                       ),
