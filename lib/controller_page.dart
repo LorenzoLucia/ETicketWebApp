@@ -17,7 +17,7 @@ class ParkingControllerPage extends StatefulWidget {
 
 class _ParkingControllerPageState extends State<ParkingControllerPage> {
   final TextEditingController _plateController = TextEditingController();
-  String _ticketStatus = '';
+  String _ticketStatus =  'Enter a plate number to check ticket status.';
   Color _statusColor = Colors.black;
   String _ticketStartTime = '';
   String _ticketEndTime = '';
@@ -268,148 +268,269 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context, listen: false);
     final apiService = appState.apiService;
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Parking Controller'),
         actions: [
-              IconButton(
-                icon: Icon(Icons.logout),
-                onPressed: () {
-                  // Handle logout logic here
-                  FirebaseAuth.instance.signOut();
-                  appState.clear();
-                  context.go('/');
-                },
-              ),
-            ],
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+              appState.clear();
+              context.go('/');
+            },
+          ),
+        ],
       ),
-      body: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+      body: isMobile
+          ? SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    TextField(
-                    controller: _plateController,
-                    decoration: InputDecoration(
-                      labelText: 'Enter Plate Number',
-                      border: OutlineInputBorder(),
-                    ),
-                    inputFormatters: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextField(
+                          controller: _plateController,
+                          decoration: InputDecoration(
+                            labelText: 'Enter Plate Number',
+                            border: OutlineInputBorder(),
+                          ),
+                          inputFormatters: [
                             FilteringTextInputFormatter.allow(
                               RegExp(r'[a-zA-Z0-9]'),
                             ),
                             UpperCaseTextFormatter(),
                           ],
-                    textCapitalization: TextCapitalization.characters,
+                          textCapitalization: TextCapitalization.characters,
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            _checkTicketStatus(apiService!);
+                          },
+                          child: Text('Check Ticket Status'),
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => _chalkCar(apiService!),
+                          child: Text('Chalk Car'),
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            _submitFine(apiService!);
+                          },
+                          child: Text('Submit Fine'),
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Ticket Status:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: _statusColor.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: _statusColor),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _ticketStatus,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: _statusColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (_ticketStartTime.isNotEmpty) ...[
+                                SizedBox(height: 8),
+                                Text('Plate: $_ticketPlate'),
+                                Text('Start Time: $_ticketStartTime'),
+                                Text('End Time: $_ticketEndTime'),
+                                Text('Cost: ${double.parse(_ticketCost).toStringAsFixed(2)}'),
+                                Text('Zone: ${_zone}'),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: (){
-                      _checkTicketStatus(apiService!);
-                    },
-                    child: Text('Check Ticket Status'),
                   ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => _chalkCar(apiService!),
-                    child: Text('Chalk Car'),
-                  ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: (){
-                      _submitFine(apiService!);
-                    },
-                    child: Text('Submit Fine'),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Ticket Status:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: _statusColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: _statusColor),
-                    ),
+                  Divider(),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _ticketStatus,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: _statusColor,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          'Chalked Cars:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        if (_ticketStartTime.isNotEmpty) ...[
-                          SizedBox(height: 8),
-                          Text('Plate: $_ticketPlate'),
-                          Text('Start Time: $_ticketStartTime'),
-                          Text('End Time: $_ticketEndTime'),
-                          Text('Cost: ${double.parse(_ticketCost).toStringAsFixed(2)}'),
-                          Text('Zone: ${_zone}'),
-                        ],
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: _chalkedCars.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(_chalkedCars[index]),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.check_circle),
+                                    onPressed: () {
+                                      _plateController.text = _chalkedCars[index];
+                                      _checkTicketStatus(apiService!);
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete),
+                                    onPressed: () => _removeChalkedCar(_chalkedCars[index], apiService!),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
-            ),
-          ),
-          VerticalDivider(),
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Chalked Cars:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _chalkedCars.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(_chalkedCars[index]),
-                          trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                            icon: Icon(Icons.check_circle),
-                            onPressed: () {
-                              // Add functionality for the new button here
-                            _plateController.text = _chalkedCars[index];
-                            _checkTicketStatus(apiService!);
-                            },
-                            ),
-                            IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () => _removeChalkedCar(_chalkedCars[index], apiService!),
-                            ),
-                          ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextField(
+                          controller: _plateController,
+                          decoration: InputDecoration(
+                            labelText: 'Enter Plate Number',
+                            border: OutlineInputBorder(),
                           ),
-                        );
-                      },
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-Z0-9]'),
+                            ),
+                            UpperCaseTextFormatter(),
+                          ],
+                          textCapitalization: TextCapitalization.characters,
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            _checkTicketStatus(apiService!);
+                          },
+                          child: Text('Check Ticket Status'),
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => _chalkCar(apiService!),
+                          child: Text('Chalk Car'),
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            _submitFine(apiService!);
+                          },
+                          child: Text('Submit Fine'),
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Ticket Status:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: _statusColor.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: _statusColor),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _ticketStatus,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: _statusColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (_ticketStartTime.isNotEmpty) ...[
+                                SizedBox(height: 8),
+                                Text('Plate: $_ticketPlate'),
+                                Text('Start Time: $_ticketStartTime'),
+                                Text('End Time: $_ticketEndTime'),
+                                Text('Cost: ${double.parse(_ticketCost).toStringAsFixed(2)}'),
+                                Text('Zone: ${_zone}'),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                VerticalDivider(),
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Chalked Cars:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: _chalkedCars.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(_chalkedCars[index]),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.check_circle),
+                                      onPressed: () {
+                                        _plateController.text = _chalkedCars[index];
+                                        _checkTicketStatus(apiService!);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete),
+                                      onPressed: () => _removeChalkedCar(_chalkedCars[index], apiService!),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
