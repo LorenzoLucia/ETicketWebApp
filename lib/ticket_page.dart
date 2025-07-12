@@ -115,7 +115,7 @@ class _TicketPageState extends State<TicketPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Select Parking Zone and Time')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,14 +127,13 @@ class _TicketPageState extends State<TicketPage> {
             DropdownButton<String>(
               value: selectedZone,
               hint: Text('Choose a zone'),
-              items:
-                  zonePrices.keys.map((zone) {
-                    double zonePrice = zonePrices[zone]!;
-                    return DropdownMenuItem<String>(
-                      value: zone,
-                      child: Text('$zone  -  $zonePrice €/hr'),
-                    );
-                  }).toList(),
+              items: zonePrices.keys.map((zone) {
+                double zonePrice = zonePrices[zone]!;
+                return DropdownMenuItem<String>(
+                  value: zone,
+                  child: Text('$zone  -  $zonePrice €/hr'),
+                );
+              }).toList(),
               onChanged: (value) {
                 setState(() {
                   selectedZone = value;
@@ -167,12 +166,13 @@ class _TicketPageState extends State<TicketPage> {
                     },
                   ),
                   SizedBox(width: 25),
-                  Text(
-                    'End Time: ${calculateTicketEndTime()}',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
                 ],
               ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'End Time: ${calculateTicketEndTime()}',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
 
             SizedBox(height: 20),
@@ -183,7 +183,7 @@ class _TicketPageState extends State<TicketPage> {
             ),
             DropdownButton<String>(
               value: plate,
-              hint: Text('Choose a registered plate or enter a new one'),
+              hint: Text('Choose a plate'),
               items: [
                 ...registeredPlates.map((plate) {
                   return DropdownMenuItem<String>(
@@ -204,18 +204,20 @@ class _TicketPageState extends State<TicketPage> {
                       String newPlate = '';
                       return AlertDialog(
                         title: Text('Enter New Plate'),
-                        content: TextField(
-                          onChanged: (text) {
-                          newPlate = text.toUpperCase();
-                          },
-                          decoration: InputDecoration(hintText: 'Plate number'),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'[a-zA-Z0-9]'),
-                            ),
-                            UpperCaseTextFormatter(),
-                          ],
-                          textCapitalization: TextCapitalization.characters,
+                        content: SingleChildScrollView(
+                          child: TextField(
+                            onChanged: (text) {
+                              newPlate = text.toUpperCase();
+                            },
+                            decoration: InputDecoration(hintText: 'Plate number'),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'[a-zA-Z0-9]'),
+                              ),
+                              UpperCaseTextFormatter(),
+                            ],
+                            textCapitalization: TextCapitalization.characters,
+                          ),
                         ),
                         actions: [
                           TextButton(
@@ -271,29 +273,27 @@ class _TicketPageState extends State<TicketPage> {
                   : 'Please select a zone to see the price',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Spacer(),
+            SizedBox(height: 20),
             Center(
               child: ElevatedButton(
-                onPressed:
-                    selectedZone != null && plate != null
-                        ? () {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (context.mounted) {
-                              context.go(
-                                '/payment',
-                                extra: {
-                                  'amount': price,
-                                  'duration':
-                                      selectedTimeHours +
-                                      selectedTimeMinutes / 60,
-                                  'plate': plate,
-                                  'zone': selectedZone,
-                                },
-                              );
-                            }
-                          });
-                        }
-                        : null,
+                onPressed: selectedZone != null && plate != null
+                    ? () {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (context.mounted) {
+                            context.go(
+                              '/payment',
+                              extra: {
+                                'amount': price,
+                                'duration':
+                                    selectedTimeHours + selectedTimeMinutes / 60,
+                                'plate': plate,
+                                'zone': selectedZone,
+                              },
+                            );
+                          }
+                        });
+                      }
+                    : null,
                 child: Text('Proceed to Payment'),
               ),
             ),

@@ -120,26 +120,74 @@ class AuthGate extends StatelessWidget {
 
             final data = userDataSnapshot.data!;
             print(data);
-            if (data['is_registered'] == false) {
-              // User not registered
-              print('User not registered');
+            try{
+              if (data['is_registered'] == false) {
+                // User not registered
+                print('User not registered');
 
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (context.mounted) {
-                  context.go('/register');
-                }
-              });
-            } else {
-              // User registered but no payment methods
-              print('User registered');
-              appState.setUserData(data["user_data"]);
-              apiService?.setUserId(data["user_id"]);
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (context.mounted) {
-                  context.go('/home');
-                }
-              });
-            }
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (context.mounted) {
+                    context.go('/register');
+                  }
+                });
+              } else {
+                // User registered but no payment methods
+                print('User registered');
+                appState.setUserData(data["user_data"]);
+                apiService?.setUserId(data["user_id"]);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (context.mounted) {
+                    context.go('/home');
+                  }
+                });
+              }
+            } catch (e) {
+                print('Error connecting to the server: $e');
+                return Container(
+                  decoration: BoxDecoration(
+                  color: Colors.redAccent.withOpacity(0.1),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                  Image.asset(
+                  'assets/error_image.png',
+                  height: 100,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                  'Error connecting to the server...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                  onPressed: () {
+                    // Reload the FutureBuilder
+                    if (context.mounted) {
+                    context.go('/');
+                    }
+                  },
+                  child: const Text('Reload'),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+                    if (context.mounted) {
+                    context.go('/');
+                    }
+                  },
+                  child: const Text('Sign Out'),
+                  ),
+                  ],
+                  ),
+                );
+              }
             return Center(
               child: CircularProgressIndicator(),
             );

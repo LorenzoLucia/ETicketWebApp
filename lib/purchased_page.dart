@@ -121,36 +121,38 @@ class _PurchasedPage extends State<PurchasedPage> {
                     ),
                     ],
                   ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                    Text(
-                      isActive ? 'Active' : 'Expired',
-                      style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isActive ? Colors.green : Colors.red,
-                      ),
-                    ),
-                    if (isActive)
-                      ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ExtensionPage(
-                          id: ticket['id'],
-                          expirationDateTime: DateTime.parse(ticket['end_time']),
-                          zone: ticket['zone']['name'],
-                          plate: ticket['plate']['number'],
-                          apiService: widget.apiService,
-                          ),
+                    trailing: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                      Text(
+                        isActive ? 'Active' : 'Expired',
+                        style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isActive ? Colors.green : Colors.red,
                         ),
-                        );
-                      },
-                      child: Text('Extend'),
                       ),
-                    ],
-                  ),
+                      if (isActive)
+                        ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ExtensionPage(
+                            id: ticket['id'],
+                            expirationDateTime: DateTime.parse(ticket['end_time']),
+                            zone: ticket['zone']['name'],
+                            plate: ticket['plate']['number'],
+                            apiService: widget.apiService,
+                            ),
+                          ),
+                          );
+                        },
+                        child: Text('Extend'),
+                        ),
+                      ],
+                    ),
+                    ),
                   ),
                 );
               },

@@ -115,25 +115,27 @@ class _FinesPage extends State<FinesPage> {
                     ),
                     ],
                   ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                    Text(
-                      issued ? 'Issued' : 'Not issued',
-                      style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: issued ? Colors.green : Colors.red,
+                    trailing: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                      Text(
+                        issued ? 'Issued' : 'Not issued',
+                        style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: issued ? Colors.green : Colors.red,
+                        ),
                       ),
+                      if (!issued)
+                        ElevatedButton(
+                        onPressed: () {
+                          issueFine(fine['id']);
+                        },
+                        child: Text('Mark as Issued'),
+                        ),
+                      ],
                     ),
-                    if (!issued)
-                      ElevatedButton(
-                      onPressed: () {
-                        issueFine(fine['id']);
-                      },
-                      child: Text('Mark as Issued'),
-                      ),
-                    ],
-                  ),
+                    ),
                   ),
                 );
               },

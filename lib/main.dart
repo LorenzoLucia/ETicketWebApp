@@ -8,8 +8,8 @@ import 'app.dart';
 import 'firebase_options.dart';
 
 final baseUrl =
-'http://localhost:5001';
-// 'http://10.214.34.119:5001'; // Replace with your actual base URL
+// 'http://localhost:5001';
+'http://192.168.1.28:5001'; // Replace with your actual base URL
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
