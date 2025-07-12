@@ -70,6 +70,7 @@ class _ExtensionPageState extends State<ExtensionPage> {
       final prices = await widget.apiService.fetchZonePrices();
       setState(() {
         zonePrices = prices;
+        calculatePrice();
       });
     } catch (e) {
       // Handle error
