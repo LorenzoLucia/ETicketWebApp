@@ -106,7 +106,7 @@ class _PurchasedPage extends State<PurchasedPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                     Text('Zone: ${ticket['zone']['name']}'),
-                    Text('Price: \$${ticket['price']}'),
+                    Text('Price: €${double.parse(ticket['price']).toStringAsFixed(2)}'),
                     Text(
                       'Start: ${ticket['start_time']}',
                       style: TextStyle(

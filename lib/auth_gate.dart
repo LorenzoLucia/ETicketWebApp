@@ -50,7 +50,7 @@ class AuthGate extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 child: AspectRatio(
                   aspectRatio: 1,
-                  child: Image.asset('assets/flutterfire_300x.png'),
+                  child: Image.asset('assets/logo.png'),
                 ),
               );
             },
@@ -59,8 +59,8 @@ class AuthGate extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child:
                     action == AuthAction.signIn
-                        ? const Text('Welcome to FlutterFire, please sign in!')
-                        : const Text('Welcome to Flutterfire, please sign up!'),
+                        ? const Text('Welcome to CityParking, please sign in!')
+                        : const Text('Welcome to CityParking, please sign up!'),
               );
             },
             footerBuilder: (context, action) {

@@ -88,8 +88,9 @@ class CardExpiryDateFormatter extends TextInputFormatter {
 class EuroPriceFormatter extends TextInputFormatter {
   final NumberFormat _numberFormat = NumberFormat.currency(
     locale: "it_IT",
-    symbol: "€ ",
+    symbol: "€",
     decimalDigits: 2,
+    customPattern: "€#,##0.00",
   );
 
   @override

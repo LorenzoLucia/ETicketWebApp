@@ -227,7 +227,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
 
           print("$amountText.");
 
-          double? amount = double.tryParse(amountText.substring(0, amountText.length - 2).replaceAll(',', '.'));
+          double? amount = double.tryParse(amountText.substring(1, amountText.length).replaceAll(',', '.'));
           if (amount == null) {
             ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Please enter a valid amount.')),

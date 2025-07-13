@@ -148,7 +148,7 @@ class _ZonesManagementPageState extends State<ZonesManagementPage> {
           final zone = zones[index];
           return ListTile(
             title: Text(zone['name']),
-            subtitle: Text('Price: \$${zone['price']}'),
+            subtitle: Text('Price: €${double.parse(zone['price']).toStringAsFixed(2)}'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -209,7 +209,7 @@ class _ZonesManagementPageState extends State<ZonesManagementPage> {
                 try {
                   final newZone = await widget.apiService.addZone(
                     nameController.text,
-                    double.parse(priceController.text.replaceAll('.', '').replaceAll(',', '.').substring(0, priceController.text.length - 2)),
+                    double.parse(priceController.text.replaceAll('.', '').replaceAll(',', '.').substring(1, priceController.text.length)),
                   );
                   _fetchZones(); // Refresh the list
                   Navigator.of(context).pop();

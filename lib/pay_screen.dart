@@ -167,7 +167,7 @@ class NewPaymentMethodPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Amount to Pay: \$${amount.toStringAsFixed(2)}',
+                'Amount to Pay: €${amount.toStringAsFixed(2)}',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
@@ -353,7 +353,7 @@ class PayNowPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Amount to Pay: \$${amount.toStringAsFixed(2)}',
+              'Amount to Pay: €${amount.toStringAsFixed(2)}',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 24),

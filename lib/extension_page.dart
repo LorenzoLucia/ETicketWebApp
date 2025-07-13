@@ -186,7 +186,7 @@ class _ExtensionPageState extends State<ExtensionPage> {
 
             Text(
               selectedZone != null
-                  ? 'Price: \$${price.toStringAsFixed(2)}'
+                  ? 'Price: €${price.toStringAsFixed(2)}'
                   : 'Please select a zone to see the price',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),

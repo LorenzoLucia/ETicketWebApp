@@ -100,7 +100,7 @@ class _FinesPage extends State<FinesPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                     // Text('Zone: ${fine['zone']['name']}'),
-                    Text('Amount: \$${fine['amount']}'),
+                    Text('Amount: €${fine['amount']}'),
                     Text(
                       'Date: ${fine['timestamp']}',
                       style: TextStyle(
