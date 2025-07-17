@@ -301,11 +301,11 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
                     children: [
                       IconButton(
                       icon: Icon(Icons.edit),
-                      onPressed: sa_flag || user['role'] != 'SYSTEM_ADMINISTRATOR'? () => _modifyUser(index) : null,
+                      onPressed: (sa_flag && user['role'] != 'SYSTEM_ADMINISTRATOR') || (user['role'] != 'SYSTEM_ADMINISTRATOR' && user['role'] != 'CUSTOMER_ADMINISTRATOR') ? () => _modifyUser(index) : null,
                       ),
                       IconButton(
                       icon: Icon(Icons.delete),
-                      onPressed: sa_flag || user['role'] != 'SYSTEM_ADMINISTRATOR'? () => _deleteUser(index) : null,
+                      onPressed: (sa_flag && user['role'] != 'SYSTEM_ADMINISTRATOR') || (user['role'] != 'SYSTEM_ADMINISTRATOR' && user['role'] != 'CUSTOMER_ADMINISTRATOR') ? () => _deleteUser(index) : null,
                       ),
                     ],
                   ),
