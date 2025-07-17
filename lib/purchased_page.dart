@@ -1,3 +1,4 @@
+import 'package:eticket_web_app/qrcode_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/extension_page.dart';
 import 'package:eticket_web_app/services/api_service.dart';
@@ -95,66 +96,70 @@ class _PurchasedPage extends State<PurchasedPage> {
             return ListView.builder(
               itemCount: tickets.length,
               itemBuilder: (context, index) {
-                final ticket = tickets[index];
-                final isActive = ticket['is_active'];
-                return Card(
-                  color: isActive ? Colors.green[100] : Colors.red[100],
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: ListTile(
-                  title: Text('Plate: ${ticket['plate']['number']}'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              final ticket = tickets[index];
+              final isActive = ticket['is_active'];
+              return Card(
+                color: isActive ? Colors.green[100] : Colors.red[100],
+                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                child: Container(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                  Text('Plate: ${ticket['plate']['number']}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text('Zone: ${ticket['zone']['name']}'),
+                  Text('Price: €${double.parse(ticket['price']).toStringAsFixed(2)}'),
+                  Text(
+                    'Start: ${ticket['start_time']}',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  Text(
+                    'Expires: ${ticket['end_time']}',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                    Text('Zone: ${ticket['zone']['name']}'),
-                    Text('Price: €${double.parse(ticket['price']).toStringAsFixed(2)}'),
-                    Text(
-                      'Start: ${ticket['start_time']}',
-                      style: TextStyle(
-                      color: Colors.black,
-                      ),
+                    ElevatedButton(
+                      onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                        builder: (context) => QRScreen(
+                          ticketId: ticket['id'],
+                          apiService: widget.apiService,
+                        ),
+                        ),
+                      );
+                      },
+                      child: Text('QR Code'),
                     ),
-                    Text(
-                      'Expires: ${ticket['end_time']}',
-                      style: TextStyle(
-                      color: Colors.black,
+                    if (isActive)
+                      ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ExtensionPage(
+                          id: ticket['id'],
+                          expirationDateTime: DateTime.parse(ticket['end_time']),
+                          zone: ticket['zone']['name'],
+                          plate: ticket['plate']['number'],
+                          apiService: widget.apiService,
+                          ),
+                        ),
+                        );
+                      },
+                      child: Text('Extend'),
                       ),
-                    ),
                     ],
                   ),
-                    trailing: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                      Text(
-                        isActive ? 'Active' : 'Expired',
-                        style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isActive ? Colors.green : Colors.red,
-                        ),
-                      ),
-                      if (isActive)
-                        ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ExtensionPage(
-                            id: ticket['id'],
-                            expirationDateTime: DateTime.parse(ticket['end_time']),
-                            zone: ticket['zone']['name'],
-                            plate: ticket['plate']['number'],
-                            apiService: widget.apiService,
-                            ),
-                          ),
-                          );
-                        },
-                        child: Text('Extend'),
-                        ),
-                      ],
-                    ),
-                    ),
-                  ),
-                );
+                  ],
+                ),
+                ),
+              );
               },
             );
           }
