@@ -46,14 +46,14 @@ class AuthGate extends StatelessWidget {
               // GoogleProvider(clientId: clientId),
             ],
             headerBuilder: (context, constraints, shrinkOffset) {
-              return Padding(
-                padding: const EdgeInsets.all(20),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Image.asset('assets/logo.png'),
-                ),
-              );
-            },
+                return Padding(
+                padding: const EdgeInsets.all(10),
+                child: Image.asset(
+                  'assets/logo.png',
+                  height: 600, // Adjust height as needed
+                  ),
+                );
+              },
             subtitleBuilder: (context, action) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -94,7 +94,8 @@ class AuthGate extends StatelessWidget {
                     padding: const EdgeInsets.all(20),
                     child: AspectRatio(
                       aspectRatio: 1,
-                      child: Image.asset('assets/flutterfire_300x.png'),
+                      child: Image.asset('assets/logo.png'),
+                      height: 600, // Adjust height as needed
                     ),
                   );
                 },
@@ -153,7 +154,7 @@ class AuthGate extends StatelessWidget {
                   children: [
                   Image.asset(
                   'assets/error_image.png',
-                  height: 100,
+                  height: 500,
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -165,15 +166,15 @@ class AuthGate extends StatelessWidget {
                   ),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                  onPressed: () {
-                    // Reload the FutureBuilder
-                    if (context.mounted) {
-                    context.go('/');
-                    }
-                  },
-                  child: const Text('Reload'),
-                  ),
+                  // ElevatedButton(
+                  // onPressed: () {
+                  //   // Reload the FutureBuilder
+                  //   if (context.mounted) {
+                  //   context.go('/');
+                  //   }
+                  // },
+                  // child: const Text('Reload'),
+                  // ),
                   const SizedBox(height: 8),
                   ElevatedButton(
                   onPressed: () async {
