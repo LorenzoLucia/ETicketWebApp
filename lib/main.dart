@@ -7,28 +7,27 @@ import 'package:provider/provider.dart';
 import 'app.dart';
 import 'firebase_options.dart';
 
-final baseUrl =
-'http://localhost:5001';
+final baseUrl = 'http://localhost:5001';
 // 'http://192.168.1.28:5001'; // Replace with your actual base URL
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await dotenv.load(fileName: "assets/.env"); // Debug print statement
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     runApp(
       ChangeNotifierProvider<AppState>(
-      create: (_) => AppState(baseUrl),
-      child: MyApp(),
+        create: (_) => AppState(baseUrl),
+        child: MyApp(),
       ),
     );
   } catch (e) {
-    runApp(MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Initialization failed: $e'),
-        ),
+    runApp(
+      MaterialApp(
+        home: Scaffold(body: Center(child: Text('Initialization failed: $e'))),
       ),
-    ));
+    );
   }
 }
