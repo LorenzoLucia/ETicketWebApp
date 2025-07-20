@@ -75,7 +75,7 @@ class _ZonesManagementPageState extends State<ZonesManagementPage> {
                   await widget.apiService.addZone(
                     // zone['id'],
                     nameController.text,
-                    double.parse(priceController.text),
+                    double.parse(priceController.text.replaceAll('.', '').replaceAll(',', '.').substring(1, priceController.text.length)),
                   );
                   _fetchZones(); // Refresh the list
                   Navigator.of(context).pop();

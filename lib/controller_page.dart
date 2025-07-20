@@ -59,7 +59,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
           DateTime currentTime = DateTime.now();
 
           if (currentTime.isBefore(endTime)) {
-            _ticketStatus = 'Ticket is valid.';
+            _ticketStatus = !response['fine_issued'] ? 'Ticket is valid.' : 'Ticket is valid, fine already issued.';
             _statusColor = Colors.green;
           } else {
             _ticketStatus = 'Ticket is expired.';
@@ -72,7 +72,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
           _zone = response['zone']['name'];
           _ticketPlate = plate;
         } else {
-          _ticketStatus = 'Ticket not found for $plate';
+          _ticketStatus = !response['fine_issued'] ? 'Ticket not found for $plate' : 'Ticket not found for $plate, fine already issued.'; 
           _statusColor = Colors.red;
           _ticketStartTime = '';
           _ticketEndTime = '';
@@ -254,6 +254,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
             );
           }
           Navigator.of(context).pop();
+          _checkTicketStatus(apiService);
           },
           child: Text('Submit'),
         ),

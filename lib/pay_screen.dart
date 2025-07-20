@@ -377,7 +377,7 @@ class PayNowPage extends StatelessWidget {
                             (context) => AlertDialog(
                               title: Text('Payment Successful'),
                               content: Text(
-                                'Your payment has been processed successfully!',
+                                'Your payment has been processed successfully! You can find your ticket in the "My eTickets" section.',
                               ),
                               actions: [
                                 TextButton(
