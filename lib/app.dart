@@ -1,5 +1,6 @@
 import 'package:eticket_web_app/ca_page.dart';
 import 'package:eticket_web_app/controller_page.dart';
+import 'package:eticket_web_app/extension_no_login.dart';
 import 'package:eticket_web_app/home.dart';
 import 'package:eticket_web_app/pay_screen.dart';
 import 'package:eticket_web_app/registration_page.dart';
@@ -150,25 +151,34 @@ final router = GoRouter(
         return RegistrationPage();
         }  ,
     ),
+    GoRoute(
+      path : '/extend/:id',
+      builder: (context, state) {
+        print('ExtensionNoLogin route called with id: ${state.pathParameters['id']}');
+
+        final appState = Provider.of<AppState>(context, listen: false);
+        if (appState.apiService == null) {
+          appState.setApiService(ApiService(appState.baseUrl));
+        }
+
+        return ExtensionNoLogin(
+        id: state.pathParameters['id'] ?? '',
+        apiService: Provider.of<AppState>(context, listen: false).apiService!,
+      );
+      },
+    )
   ],
   redirect: (context, state) {
     final user = FirebaseAuth.instance.currentUser;
     final appState = Provider.of<AppState>(context, listen: false);
     // print('Redirecting...');
-    if (user == null) { // User is not logged in, redirect to login
+    print(state.fullPath);
+    if (user == null && !state.fullPath!.startsWith('/extend/')) { // User is not logged in, redirect to login
       WidgetsBinding.instance.addPostFrameCallback((_) {
         GoRouter.of(context).go('/');
       });
       return '/';
     } 
-    // if (appState.userData == null) {
-    //   // Fetch user data if not already set
-    //   FirebaseAuth.instance.signOut();
-    //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     GoRouter.of(context).go('/');
-    //   });
-    //   return '/'; // Wait for user data to be fetched
-    // }
     return null;
   },
 ); // Replace with your actual base URL
@@ -195,3 +205,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+

@@ -24,7 +24,6 @@ class ApiService {
     final tokenId = await getTokenId();
     final response = await http.get(
       Uri.parse('$baseUrl/zones'),
-      headers: {'auth': (tokenId ?? '')},
     );
     if (response.statusCode == 200) {
       Map<String, double> zonePrices = {};
@@ -587,4 +586,54 @@ class ApiService {
     }
   }
 
+  Future<Map<String,dynamic>> loadTicket(String id) async {
+    final url = Uri.parse('$baseUrl/get-ticket/$id');
+    try {
+      final response = await http.get(
+        url,
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to load ticket');
+      }
+    } catch (e) {
+      throw Exception('Error loading ticket: $e');
+    }
+  }
+
+  Future<Map<String,dynamic>> payTicketNoLogin(
+    String plate,
+    String cardNumber,
+    String cardOwner,
+    String expiryDate,
+    String cvc,
+    String amount,
+    String duration,
+    String zone,
+    String? id,
+  ) async {
+    final url = Uri.parse('$baseUrl/pay-no-login/$id');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'plate': plate,
+          'card_number': cardNumber,
+          'card_owner': cardOwner,
+          'expiry_date': expiryDate,
+          'cvc': cvc,
+          'amount': amount,
+          'duration': duration,
+          'zone': zone,
+        }),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      throw Exception('Error paying ticket without login: $e');
+    }
+  }
+
 }
+
