@@ -341,7 +341,7 @@ class PayNowPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+            children: [
             Text(
               'Amount to Pay: €${amount.toStringAsFixed(2)}',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -349,53 +349,62 @@ class PayNowPage extends StatelessWidget {
             SizedBox(height: 24),
             Center(
               child: ElevatedButton(
-                child: Text('Confirm Payment'),
-                onPressed: () async {
-                  try {
-                    final success = await apiService.payTicket(
-                      plate ?? '',
-                      methodId,
-                      amount.toString(),
-                      duration.toString(),
-                      zone,
-                      id ?? '',
-                    );
-                    if (success) {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (context) => AlertDialog(
-                              title: Text('Payment Successful'),
-                              content: Text(
-                                'Your payment has been processed successfully! You can find your ticket in the "My eTickets" section.',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                                      if (context.mounted) {
-                                        context.go('/home');
-                                      }
-                                    });
-                                  },
-                                  child: Text('OK'),
-                                ),
-                              ],
-                            ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Payment failed. Please try again.'),
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error processing payment: $e')),
-                    );
-                  }
-                },
+              child: Text('Confirm Payment'),
+              onPressed: () async {
+                showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => Center(
+                  child: CircularProgressIndicator(),
+                ),
+                );
+
+                try {
+                final success = await apiService.payTicket(
+                  plate ?? '',
+                  methodId,
+                  amount.toString(),
+                  duration.toString(),
+                  zone,
+                  id ?? '',
+                );
+                Navigator.of(context).pop(); // Dismiss loading dialog
+                if (success) {
+                  showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Payment Successful'),
+                    content: Text(
+                    'Your payment has been processed successfully! You can find your ticket in the "My eTickets" section.',
+                    ),
+                    actions: [
+                    TextButton(
+                      onPressed: () {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (context.mounted) {
+                        context.go('/home');
+                        }
+                      });
+                      },
+                      child: Text('OK'),
+                    ),
+                    ],
+                  ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Payment failed. Please try again.'),
+                  ),
+                  );
+                }
+                } catch (e) {
+                Navigator.of(context).pop(); // Dismiss loading dialog
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error processing payment: $e')),
+                );
+                }
+              },
               ),
             ),
           ],

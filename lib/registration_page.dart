@@ -1,5 +1,6 @@
-import 'package:eticket_web_app/auth_gate.dart';
+
 import 'package:eticket_web_app/services/app_state.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eticket_web_app/services/api_service.dart';
 import 'package:go_router/go_router.dart';
@@ -89,6 +90,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registration Page'),
+        actions: [
+                    IconButton(
+                      icon: Icon(Icons.logout),
+                      onPressed: () {
+                        FirebaseAuth.instance.signOut();
+                        appState.clear();
+                        context.go('/');
+                      },
+                    ),
+                  ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

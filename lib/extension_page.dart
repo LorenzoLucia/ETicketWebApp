@@ -161,7 +161,7 @@ class _ExtensionPageState extends State<ExtensionPage> {
                 children: [
                   TimePickerTextField(
                     ticketEndTime: expirationDateTime,
-                    title: "Select Ticket Extension Time",
+                    title: "Select Extension Time",
                     initialTime: Duration(hours: now.hour, minutes: now.minute),
                     shortDurationWarning:
                         "Ticket extension time must be at least 5 minutes!",
