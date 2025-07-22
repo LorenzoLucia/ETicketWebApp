@@ -16,25 +16,20 @@ class QRScreen extends StatefulWidget {
 class _QRScreenState extends State<QRScreen> {
   final gitUrl =
       "https://raw.githubusercontent.com/LorenzoLucia/ETicketTotem/refs/heads/main/ticket_files";
-  Timer? _endTimer;
 
   @override
   void initState() {
     super.initState();
-    _endTimer = Timer(const Duration(seconds: 60), () {
-      _endTicketPurchase();
-    });
   }
 
   @override
   void dispose() {
-    _endTimer?.cancel();
     super.dispose();
   }
 
-  void _endTicketPurchase() {
-    Navigator.of(context).popUntil((route) => route.isFirst);
-  }
+  // void _endTicketPurchase() {
+  //   Navigator.of(context).popUntil((route) => route.isFirst);
+  // }
 
   QrCode _createQrCode() {
     return QrCode(6, QrErrorCorrectLevel.L)
