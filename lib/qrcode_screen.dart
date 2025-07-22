@@ -7,7 +7,7 @@ class QRScreen extends StatefulWidget {
   final String? ticketId;
   final ApiService apiService;
 
-  QRScreen({super.key, this.ticketId, required this.apiService});
+  const QRScreen({super.key, this.ticketId, required this.apiService});
 
   @override
   State<QRScreen> createState() => _QRScreenState();

@@ -542,25 +542,15 @@ class RegisterPaymentMethodPage extends StatelessWidget {
                           cvcController.text,
                           cardOwnerController.text,
                         );
-                        if (methodId != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Payment method added successfully',
-                              ),
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Payment method added successfully',
                             ),
-                          );
-                          Navigator.of(context).pop();
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Failed to add payment method. Please try again.',
-                              ),
-                            ),
-                          );
-                        }
-                      } catch (e) {
+                          ),
+                        );
+                        Navigator.of(context).pop();
+                                            } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Error adding payment method: $e'),

@@ -72,7 +72,7 @@ class _ExtensionPageState extends State<ExtensionNoLogin> {
   }
 
   String calculateTicketEndTime() {
-    DateTime date = expirationDateTime!.add(
+    DateTime date = expirationDateTime.add(
       Duration(hours: selectedTimeHours, minutes: selectedTimeMinutes),
     );
     Map<int, String> months = {
@@ -210,7 +210,7 @@ class _PayScreenNoLoginState extends State<PayScreenNoLogin> {
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
   List<Map<String, String>> paymentMethods = [];
-  late String _hasRegisteredPaymentMethodsFuture = '';
+  late final String _hasRegisteredPaymentMethodsFuture = '';
 
   @override
   void initState() {
@@ -453,7 +453,7 @@ class PayNowPageNoLogin extends StatelessWidget {
   final String expiryDate;
   final String cvc;
 
-  PayNowPageNoLogin({
+  const PayNowPageNoLogin({
     super.key,
     required this.amount,
     required this.duration,

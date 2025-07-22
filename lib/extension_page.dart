@@ -91,7 +91,7 @@ class _ExtensionPageState extends State<ExtensionPage> {
   }
 
   String calculateTicketEndTime() {
-    DateTime date = expirationDateTime!.add(
+    DateTime date = expirationDateTime.add(
       Duration(hours: selectedTimeHours, minutes: selectedTimeMinutes),
     );
     Map<int, String> months = {

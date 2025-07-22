@@ -185,7 +185,7 @@ final router = GoRouter(
 
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   @override
 

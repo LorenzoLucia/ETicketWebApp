@@ -9,13 +9,13 @@ class TimePickerTextField extends StatefulWidget {
   final String? shortDurationWarning;
 
   const TimePickerTextField({
-    Key? key,
+    super.key,
     this.onTimeChanged,
     this.initialTime,
     this.title,
     this.ticketEndTime,
     this.shortDurationWarning,
-  }) : super(key: key);
+  });
 
   @override
   State<TimePickerTextField> createState() => _TimePickerTextFieldState();
@@ -102,14 +102,10 @@ class _TimePickerTextFieldState extends State<TimePickerTextField> {
   }
 
   void _updateTextField() {
-    if (selectedTime != null) {
-      Duration difference = _calculateDifference(selectedTime!);
-      _convertDurationToHours(difference);
-      _controller.text = _formatTime(selectedTime!);
-    } else {
-      _controller.clear();
+    Duration difference = _calculateDifference(selectedTime!);
+    _convertDurationToHours(difference);
+    _controller.text = _formatTime(selectedTime!);
     }
-  }
 
   void _showTimePicker() {
     isDurationValid = true;

@@ -49,7 +49,7 @@ class _PayScreenState extends State<PayScreen> {
   final TextEditingController expiryDateController = TextEditingController();
   final TextEditingController cvcController = TextEditingController();
   List<Map<String, String>> paymentMethods = [];
-  late String _hasRegisteredPaymentMethodsFuture = '';
+  late final String _hasRegisteredPaymentMethodsFuture = '';
 
   @override
   void initState() {
@@ -276,31 +276,21 @@ class NewPaymentMethodPage extends StatelessWidget {
                           cvcController.text,
                           cardOwnerController.text,
                         );
-                        if (methodId != null) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => PayNowPage(
-                                    methodId: methodId,
-                                    amount: amount,
-                                    duration: duration,
-                                    zone: zone,
-                                    id: id,
-                                    plate: plate,
-                                    // apiService: apiService,
-                                  ),
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Failed to register payment method. Please try again.',
-                              ),
-                            ),
-                          );
-                        }
-                      } catch (e) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder:
+                                (context) => PayNowPage(
+                                  methodId: methodId,
+                                  amount: amount,
+                                  duration: duration,
+                                  zone: zone,
+                                  id: id,
+                                  plate: plate,
+                                  // apiService: apiService,
+                                ),
+                          ),
+                        );
+                                            } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
@@ -330,7 +320,7 @@ class PayNowPage extends StatelessWidget {
   final String? plate;
   // final ApiService apiService;
 
-  PayNowPage({
+  const PayNowPage({
     super.key,
     required this.methodId,
     required this.amount,

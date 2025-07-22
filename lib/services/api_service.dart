@@ -253,13 +253,13 @@ class ApiService {
 
   Future<bool> modifyUser(
     String uid,
-    String new_email,
-    String new_role,
+    String newEmail,
+    String newRole,
   ) async {
     final url = Uri.parse('$baseUrl/users/$uid');
     final body = jsonEncode({
-      'email': new_email,
-      'role': new_role,
+      'email': newEmail,
+      'role': newRole,
     });
 
     try {
@@ -458,7 +458,7 @@ class ApiService {
           'amount': amount,
           'duration': duration,
           'zone': zone,
-          'ticket_id': id!,
+          'ticket_id': id,
           'plate': plate,
         }),
       );

@@ -1,17 +1,12 @@
 // import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:eticket_web_app/controller_page.dart';
 import 'package:eticket_web_app/profile_page.dart';
-import 'package:eticket_web_app/services/api_service.dart';
 import 'package:eticket_web_app/services/app_state.dart';
 import 'package:eticket_web_app/ticket_page.dart';
 import 'package:eticket_web_app/purchased_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:english_words/english_words.dart';
-import 'package:eticket_web_app/ca_page.dart';
 
 class HomeScreen extends StatelessWidget {
   // final ApiService apiService;

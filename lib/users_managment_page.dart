@@ -172,7 +172,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
     );
   }
 
-  void _addUser(sa_flag) {
+  void _addUser(saFlag) {
     TextEditingController emailController = TextEditingController();
     TextEditingController nameController = TextEditingController();
     TextEditingController surnameController = TextEditingController();
@@ -200,7 +200,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
               ),
               DropdownButtonFormField<String>(
               value: selectedRole,
-              items: (sa_flag
+              items: (saFlag
                   ? ['User', 'Controller', 'Customer Administrator', 'System Administrator']
                   : ['User', 'Controller'])
                 .map((role) => DropdownMenuItem(value: role, child: Text(role)))
@@ -249,7 +249,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context, listen: false);
     // final apiService = appState.apiService;
-    final sa_flag = appState.userData!['role'] == 'SYSTEM_ADMINISTRATOR';
+    final saFlag = appState.userData!['role'] == 'SYSTEM_ADMINISTRATOR';
 
     return Scaffold(
       appBar: AppBar(
@@ -261,7 +261,7 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
               'Add User',
               style: TextStyle(fontSize: 18),
             ),
-            onPressed: () => _addUser(sa_flag),
+            onPressed: () => _addUser(saFlag),
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
@@ -301,11 +301,11 @@ class _UsersManagementPageState extends State<UsersManagementPage> {
                     children: [
                       IconButton(
                       icon: Icon(Icons.edit),
-                      onPressed: (sa_flag && user['role'] != 'SYSTEM_ADMINISTRATOR') || (user['role'] != 'SYSTEM_ADMINISTRATOR' && user['role'] != 'CUSTOMER_ADMINISTRATOR') ? () => _modifyUser(index) : null,
+                      onPressed: (saFlag && user['role'] != 'SYSTEM_ADMINISTRATOR') || (user['role'] != 'SYSTEM_ADMINISTRATOR' && user['role'] != 'CUSTOMER_ADMINISTRATOR') ? () => _modifyUser(index) : null,
                       ),
                       IconButton(
                       icon: Icon(Icons.delete),
-                      onPressed: (sa_flag && user['role'] != 'SYSTEM_ADMINISTRATOR') || (user['role'] != 'SYSTEM_ADMINISTRATOR' && user['role'] != 'CUSTOMER_ADMINISTRATOR') ? () => _deleteUser(index) : null,
+                      onPressed: (saFlag && user['role'] != 'SYSTEM_ADMINISTRATOR') || (user['role'] != 'SYSTEM_ADMINISTRATOR' && user['role'] != 'CUSTOMER_ADMINISTRATOR') ? () => _deleteUser(index) : null,
                       ),
                     ],
                   ),

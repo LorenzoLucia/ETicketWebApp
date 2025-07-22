@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 
 class ParkingControllerPage extends StatefulWidget {
 
-  ParkingControllerPage({super.key});
+  const ParkingControllerPage({super.key});
   @override
   _ParkingControllerPageState createState() => _ParkingControllerPageState();
 }
@@ -357,7 +357,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
                                 Text('Start Time: $_ticketStartTime'),
                                 Text('End Time: $_ticketEndTime'),
                                 Text('Cost: ${double.parse(_ticketCost).toStringAsFixed(2)}'),
-                                Text('Zone: ${_zone}'),
+                                Text('Zone: $_zone'),
                               ],
                             ],
                           ),
@@ -479,7 +479,7 @@ class _ParkingControllerPageState extends State<ParkingControllerPage> {
                                 Text('Start Time: $_ticketStartTime'),
                                 Text('End Time: $_ticketEndTime'),
                                 Text('Cost: ${double.parse(_ticketCost).toStringAsFixed(2)}'),
-                                Text('Zone: ${_zone}'),
+                                Text('Zone: $_zone'),
                               ],
                             ],
                           ),

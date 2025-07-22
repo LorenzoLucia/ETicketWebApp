@@ -29,7 +29,7 @@ class _CustomerAdminPageState extends State<CustomerAdminPage> {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context, listen: false);
     final apiService = appState.apiService;
-    final sa_flag = appState.userData!['role'] == 'SYSTEM_ADMINISTRATOR';
+    final saFlag = appState.userData!['role'] == 'SYSTEM_ADMINISTRATOR';
     Widget page;
     switch (selectedIndex) {
       case 0:
@@ -39,7 +39,7 @@ class _CustomerAdminPageState extends State<CustomerAdminPage> {
         page = ZonesManagementPage(apiService: apiService!,);
         break;
       case 2:
-        if (!sa_flag) {
+        if (!saFlag) {
           page = FinesPage(apiService: apiService!,);
         } else {
           page = Center(child: Text('You do not have permission to access this page. Here Customer Administrator can see emitted fines.'));
@@ -49,7 +49,7 @@ class _CustomerAdminPageState extends State<CustomerAdminPage> {
         throw UnimplementedError('no widget for $selectedIndex');
     }
 
-    if (!sa_flag)
+    if (!saFlag)
     {
       return LayoutBuilder(
         builder: (context, constraints) {
