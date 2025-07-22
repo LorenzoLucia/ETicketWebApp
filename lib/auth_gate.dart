@@ -193,20 +193,6 @@ class AuthGate extends StatelessWidget {
             return Center(
               child: CircularProgressIndicator(),
             );
-
-            // if (user.metadata.creationTime == user.metadata.lastSignInTime) {
-            //   // User just registered
-            //   return RegistrationPage(
-            //     apiService: apiService,
-            //     userData: data["user_data"],
-            //   );
-            // } else {r
-            //   // User logged in
-            //   return HomeScreen(
-            //     apiService: apiService,
-            //     userData: data["user_data"],
-            //   );
-            // }
           },
         );
       },

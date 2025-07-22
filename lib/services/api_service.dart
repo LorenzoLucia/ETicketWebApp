@@ -38,27 +38,6 @@ class ApiService {
     }
   }
 
-  // Future<bool> hasRegisteredPaymentMethods() async {
-
-  //   try {
-  //     final tokenId = await getTokenId();
-  //     final url = Uri.parse('$baseUrl/$user_id/payment-methods');
-  //     final response = await http.get(
-  //       url,
-  //       headers: {'auth': (tokenId ?? '')});
-  //     if (response.statusCode == 200) {
-  //       final data = jsonDecode(response.body);
-  //       return data['hasPaymentMethods'] ?? false;
-  //     } else {
-  //       throw Exception('Failed to load payment methods');
-  //     }
-  //   } catch (e) {
-  //     print('Error: $e');
-  //     // return false;
-  //     return true; // For debug purposes, always return true
-  //   }
-  // }
-
   Future<List<Map<String, dynamic>>> fetchTickets() async {
     try {
       final tokenId = await getTokenId();
@@ -77,23 +56,6 @@ class ApiService {
       throw Exception('Error fetching tickets: $e');
     }
   }
-
-  // Future<Map<String, dynamic>> fetchProfileData() async {
-  //   try {
-  //     final tokenId = await getTokenId();
-  //     final response = await http.get(
-  //       Uri.parse('$baseUrl/profile'),
-  //       headers: {'auth': (tokenId ?? '')});
-  //     if (response.statusCode == 200) {
-  //       return Map<String, dynamic>.from(json.decode(response.body));
-  //     } else {
-  //       throw Exception('Failed to load tickets');
-  //     }
-  //   } catch (e) {
-  //     // Handle errors appropriately
-  //     throw Exception('Error fetching tickets: $e');
-  //   }
-  // }
 
   Future<List<Map<String, String>>> fetchPaymentMethods() async {
     try {
